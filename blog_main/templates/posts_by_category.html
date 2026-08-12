@@ -1,44 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
-{% for post in featured_post %}
-{% if forloop.first %}
-<div class="jumbotron p-3 p-md-5 text-white rounded bg-dark" style="
-                background-image: url('{{ post.featured_image.url }}');
-                background-size: cover;
-                background-position: center;
-                background-repeat: no-repeat;
-                background-blend-mode: overlay;
-                height: 400px;
-                padding: 40px;
-             ">
 
-    <div class="col-md-5 px-0">
 
-        <h1 class="font-italic" style="
-                        font-size: 30px;
-                        line-height: 1.1;
-                        margin-bottom: 15px;
-                    ">
-            {{ post.title }}
-        </h1>
 
-        <p class="lead" style="
-                        font-size: 22px;
-                        line-height: 1.5;
-                        margin-bottom: 25px;
-                    ">
-            {{ post.short_description|truncatewords:20 }}
-        </p>
-
-        <a href="#" class="btn btn-warning btn-lg">
-            Continue Reading
-        </a>
-
-    </div>
-
-</div>
-{% endif %}
-{% endfor %}
 
 
 
@@ -53,7 +17,7 @@
     <div class="col-md-6">
         <div class="card border-0">
             <div class="card-body">
-                <h3>{{ post.title }}</h3>
+                <h3><a href="{% url 'blogs' post.slug %}" class="text-dark">{{ post.title }}</a> </h3>
                 <small class="mb-1 text-muted">{{ post.created_at | timesince }} ago |
                     {{ post.author}}</small>
                 <p class="card-text" style="min-height:120px;">
