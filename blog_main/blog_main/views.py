@@ -51,7 +51,7 @@ def login(request):
             if user is not None:
                 auth.login(request,user)
 
-            return redirect ('home')
+            return redirect ('dashbord')
     form = AuthenticationForm()
     context = {
         'form': form,
