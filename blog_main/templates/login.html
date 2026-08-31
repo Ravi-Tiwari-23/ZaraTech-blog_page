@@ -5,8 +5,9 @@
 {% load crispy_forms_tags %}
 
 <h3 class="text-center">Login</h3>
-<form action="{% url 'login' %}" method="POST" style="width: 500px; margin: auto;">
+<form action="{% url 'login' %}" method="POST" style="max-width: 500px; margin: auto;">
     {% csrf_token %}
+    {% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% endif %}
     {{ form | crispy }}
 
     <button type="submit" class="btn btn-warning">Login</button>

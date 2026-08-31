@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.utils.text import slugify
 
 
 class Category(models.Model):
@@ -14,10 +14,13 @@ class Category(models.Model):
 
     def __str__(self):
         return self.category_name
+
+
 STATUS_CHOICES = (
     ("Draft", "Draft"),
     ("Published", "Published")
 )
+
 
 class Blog(models.Model):
     title = models.CharField(max_length=100)
@@ -37,9 +40,47 @@ class Blog(models.Model):
 
     is_featured = models.BooleanField(default=False)
 
+    views = models.PositiveIntegerField(default=0, editable=False)
+
     created_at = models.DateTimeField(auto_now_add =True)
 
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ('-created_at',)
+
+    def save(self, *args, **kwargs):
+        """Generate a stable, unique slug without changing it on later edits."""
+        if not self.slug:
+            base_slug = slugify(self.title)[:130] or 'post'
+            candidate = base_slug
+            counter = 1
+            while Blog.objects.filter(slug=candidate).exclude(pk=self.pk).exists():
+                suffix = f'-{counter}'
+                candidate = f'{base_slug[:150 - len(suffix)]}{suffix}'
+                counter += 1
+            self.slug = candidate
+        super().save(*args, **kwargs)
+
+    @property
+    def reading_time(self):
+        words = len(self.blog_body.split())
+        return max(1, round(words / 200))
+
     def __str__(self):
         return self.title
+
+
+class Comment(models.Model):
+    blog = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_comments')
+    body = models.TextField(max_length=1000)
+    is_approved = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ('-created_at',)
+
+    def __str__(self):
+        return f'{self.user.username}: {self.body[:40]}'

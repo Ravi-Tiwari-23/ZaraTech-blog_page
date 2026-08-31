@@ -4,7 +4,7 @@
 {% block content %}
 {% load crispy_forms_tags %}
 <h3 class="text-center">Register</h3>
-<form actions="{% url 'register' %}" method="POST" style="width: 500px; margin: auto;">
+<form action="{% url 'register' %}" method="POST" style="max-width: 500px; margin: auto;">
     {% csrf_token %}
     {{ form | crispy }}
 

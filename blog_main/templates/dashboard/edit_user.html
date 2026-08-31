@@ -1,0 +1,4 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Edit user | ZaraTech{% endblock %}
+{% block content %}<div class="row">{% include 'dashboard/sidebar.html' %}<div class="col-md-9"><h2>Edit {{ edited_user.username }}</h2><form action="{% url 'edit_user' edited_user.id %}" method="POST" class="card card-body border-0 shadow-sm">{% csrf_token %}{{ form|crispy }}<div><button class="btn btn-warning">Save changes</button> <a href="{% url 'users' %}" class="btn btn-light">Cancel</a></div></form></div></div>{% endblock %}

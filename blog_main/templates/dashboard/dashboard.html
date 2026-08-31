@@ -1,37 +1,26 @@
 {% extends 'base.html' %}
-
+{% block title %}Dashboard | ZaraTech{% endblock %}
 {% block content %}
-
 <div class="row">
-    <!-- Left sidebar -->
-    <!-- load the sidebar here -->
     {% include 'dashboard/sidebar.html' %}
-
-
-    <!-- Right side content -->
     <div class="col-md-9">
-        <span>Logged in as <b>{{ user }}</b></span>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div><h2 class="mb-0">Dashboard</h2><small class="text-muted">Welcome, {{ user.get_full_name|default:user.username }}{% if is_manager %} · Manager{% else %} · Editor{% endif %}</small></div>
+            <a href="{% url 'add_post' %}" class="btn btn-warning"><i class="fa fa-plus mr-1"></i> New post</a>
+        </div>
         <div class="row">
-
-            <div class="col">
-                <div class="card border-default mb-3">
-                    <div class="card-header text-center text-uppercase font-weight-bold">All Categories</div>
-                    <div class="card-body text-dark">
-                        <h5 class="card-title text-center">{{ category_count }}</h5>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col">
-                <div class="card border-default mb-3">
-                    <div class="card-header text-center text-uppercase font-weight-bold">All Posts</div>
-                    <div class="card-body text-dark">
-                        <h5 class="card-title text-center">{{ blogs_count }}</h5>
-                    </div>
-                </div>
+            <div class="col-sm-6 col-xl-3 mb-3"><div class="card dashboard-card h-100"><div class="card-body"><small class="text-muted text-uppercase">Posts</small><h3>{{ blogs_count }}</h3><span class="text-success">{{ published_count }} published</span></div></div></div>
+            <div class="col-sm-6 col-xl-3 mb-3"><div class="card dashboard-card h-100"><div class="card-body"><small class="text-muted text-uppercase">Total views</small><h3>{{ total_views }}</h3><span class="text-muted">Across your posts</span></div></div></div>
+            <div class="col-sm-6 col-xl-3 mb-3"><div class="card dashboard-card h-100"><div class="card-body"><small class="text-muted text-uppercase">Comments</small><h3>{{ comment_count }}</h3><span class="text-muted">Community replies</span></div></div></div>
+            <div class="col-sm-6 col-xl-3 mb-3"><div class="card dashboard-card h-100"><div class="card-body"><small class="text-muted text-uppercase">{% if is_manager %}Users{% else %}Drafts{% endif %}</small><h3>{% if is_manager %}{{ user_count }}{% else %}{{ draft_count }}{% endif %}</h3><span class="text-muted">{% if is_manager %}Registered accounts{% else %}Waiting to publish{% endif %}</span></div></div></div>
+        </div>
+        <div class="card border-0 shadow-sm mt-2">
+            <div class="card-header bg-white font-weight-bold">Recent posts</div>
+            <div class="list-group list-group-flush">
+                {% for post in recent_posts %}<a href="{% url 'edit_post' post.id %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"><span>{{ post.title }} <small class="text-muted d-block">{{ post.status }} · {{ post.updated_at|timesince }} ago</small></span><span class="badge badge-light"><i class="fa fa-eye"></i> {{ post.views }}</span></a>
+                {% empty %}<div class="list-group-item text-muted">No posts yet.</div>{% endfor %}
             </div>
         </div>
     </div>
 </div>
-
 {% endblock %}

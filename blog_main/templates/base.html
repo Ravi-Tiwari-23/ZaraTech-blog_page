@@ -8,26 +8,26 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZaraTech</title>
+    <title>{% block title %}ZaraTech{% endblock %}</title>
     <link href="https://getbootstrap.com/docs/4.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Playfair+Display:700,900" rel="stylesheet">
     <link href="{% static 'css/blog.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 
-<body>
+<body class="bg-light">
     <div class="container">
-        <header class="blog-header py-3">
+        <header class="blog-header py-3 bg-white px-3 mt-3 rounded shadow-sm">
             <div class="row flex-nowrap justify-content-between align-items-center">
                 <div class="col-4 pt-1">
-                    <a class="blog-header-logo text-dark" href="/">ZaraTech</a>
+                    <a class="blog-header-logo text-dark" href="{% url 'home' %}">ZaraTech</a>
                 </div>
                 <div class="col-4">
                     <form action="{% url 'search' %}" method="GET">
                         <div class="input-group">
                             <input class="form-control" type="text" name="keyword" value="{{ keyword }}"
                                 placeholder="Enter search term..." aria-label="Enter search">
-                            <button type="submit" class="btn btn-warning" id="button-search" type="button">Go!</button>
+                            <button type="submit" class="btn btn-warning" id="button-search">Search</button>
                         </div>
                     </form>
                 </div>
@@ -36,16 +36,18 @@
                     <a class="btn btn-sm btn-warning" href="{% url 'login' %}">Login</a> &nbsp;
                     <a class="btn btn-sm btn-outline-secondary" href="{% url 'register' %}">Register</a>
                     {% else %}
-                    <span><a href="{% url 'dashboard' %}">Dashboard</a> </span>
-                    &emsp;
-                    <span><a href="{% url 'logout' %}">Logout</a></span>
+                    <span class="text-muted mr-3">Hi, {{ user.first_name|default:user.username }}</span>
+                    {% if has_dashboard_access %}
+                    <a class="btn btn-sm btn-outline-dark mr-2" href="{% url 'dashboard' %}">Dashboard</a>
+                    {% endif %}
+                    <a class="btn btn-sm btn-warning" href="{% url 'logout' %}">Logout</a>
 
                     {% endif %}
                 </div>
             </div>
         </header>
 
-        <div class="nav-scroller py-1 mb-2">
+        <div class="nav-scroller py-2 mb-3">
             <nav class="nav d-flex justify-content-between">
                 {% for cat in categories %}
                 <a class="p-2 text-muted" href="{% url 'posts_by_category' cat.id %}">{{cat.category_name }}</a>
@@ -54,6 +56,15 @@
             </nav>
 
 
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
             <!-- Main Content Part -->
             {% block content %}
 
@@ -61,9 +72,13 @@
 
             <!-- Footer Part  -->
 
-            <footer class=" blog-footer">
-                <p style="text-align: center;">Made by ZaRaIT <a href="#">for India</a></p>
+            <footer class="blog-footer mt-5 py-4 border-top">
+                <p class="text-center text-muted mb-0">Made by ZaRaIT for India</p>
             </footer>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

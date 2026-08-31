@@ -14,7 +14,7 @@
             <div class="card-body">
                 <h3><a href="{% url 'blogs' i.slug %}" class="text-dark">{{ i.title }}</a> </h3>
                 <small class="mb-1 text-muted">{{ i.created_at | timesince }} ago |
-                    {{ i.author}}</small>
+                    {{ i.author}} · <i class="fa fa-eye"></i> {{ i.views }} · {{ i.reading_time }} min read</small>
                 <p class="card-text" style="min-height:120px;">
                     {{ i.short_description | truncatewords:35 }}
                 </p>

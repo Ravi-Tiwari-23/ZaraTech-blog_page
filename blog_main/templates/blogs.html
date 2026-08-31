@@ -1,102 +1,48 @@
 {% extends 'base.html' %}
-
+{% block title %}{{ single_blog.title }} | ZaraTech{% endblock %}
 {% block content %}
-
-<!-- Page content-->
-<div class="container mt-5">
+<div class="container mt-4">
     <div class="row">
         <div class="col-lg-8">
-            <!-- Post content-->
-            <article>
-                <!-- Post header-->
-                <header class="mb-4">
-                    <!-- Post title-->
-                    <h1 class="fw-bolder mb-1">{{ single_blog.title }}</h1>
-                    <!-- Post meta content-->
-                    <div class="text-muted fst-italic mb-2">
-                        Posted on {{ single_blog.created_at }} by {{single_blog.author }}
+            <article class="card border-0 shadow-sm overflow-hidden">
+                {% if single_blog.featured_image %}<img class="img-fluid post-hero" src="{{ single_blog.featured_image.url }}" alt="{{ single_blog.title }}">{% endif %}
+                <div class="card-body p-4 p-md-5">
+                    <a class="badge badge-warning mb-3" href="{% url 'posts_by_category' single_blog.Category.id %}">{{ single_blog.Category.category_name }}</a>
+                    <h1 class="display-4 post-title">{{ single_blog.title }}</h1>
+                    <div class="text-muted mb-4 d-flex flex-wrap post-meta">
+                        <span><i class="fa fa-user"></i> {{ single_blog.author.get_full_name|default:single_blog.author.username }}</span>
+                        <span><i class="fa fa-calendar"></i> {{ single_blog.created_at|date:'M d, Y' }}</span>
+                        <span><i class="fa fa-clock-o"></i> {{ single_blog.reading_time }} min read</span>
+                        <span><i class="fa fa-eye"></i> {{ single_blog.views }} views</span>
                     </div>
-                    <!-- Post category-->
-                    <a class="badge bg-warning text-decoration-none text-light" href="#!">
-                        {{ single_blog.Category.category_name }}
-                    </a>
-                </header>
-                <!-- Preview image figure-->
-                <figure class="mb-4"><img class="img-fluid rounded" src="{{ single_blog.featured_image.url }}"
-                        alt="..." /></figure>
-                <!-- Post content-->
-                <section class="mb-5">
-                    <p class="fs-5 mb-4">{{ single_blog.short_description }}</p>
-                    <p class="fs-5 mb-4">{{ single_blog.blog_body }}</p>
-
-                    <!-- Comments -->
-                    <h4>Comments ({{ comment_count }})</h4>
-                    {% if comments %}
-                    {% for comment in comments %}
-                    <div class="card mt-1">
-                        <div class="card-body">
-                            <p class="card-text mb-0">{{ comment }}</p>
-                            <span>
-                                <small>By {{ comment.user }}</small>
-                                <small>| {{ comment.created_at | timesince }} ago</small>
-                            </span>
-                        </div>
-                    </div>
-                    {% endfor %}
-                    {% else %}
-                    No comments yet.
-                    {% endif %}
-                    <br>
-                    <div class="form-group">
-                        {% if user.is_authenticated %}
-                        <form action="" method="POST">
-                            {% csrf_token %}
-                            <div class="form-group">
-                                <textarea name="comment" class="form-control"
-                                    placeholder="Write your comment"></textarea>
-                                <input type="submit" value="Submit" class="btn btn-primary mt-2">
-                            </div>
-
-                        </form>
-                        {% else %}
-                        <p>Please <span><a href="{% url 'login' %}">login</a></span> to write a comment!</p>
-                        {% endif %}
-                    </div>
-
-                </section>
-            </article>
-        </div>
-        <!-- Side widgets-->
-        <div class="col-lg-4">
-
-            <!-- Categories widget-->
-            <div class="card mb-4 p-3">
-                <h4 class="font-italic">Categories</h4>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <ul class="list-unstyled mb-0">
-                                {% for cat in categories %}
-                                <li><a href="{% url 'posts_by_category' cat.id %}">{{ cat.category_name }}</a></li>
-                                {% endfor %}
-                            </ul>
-                        </div>
+                    <p class="lead font-weight-bold">{{ single_blog.short_description }}</p>
+                    <div class="post-body">{{ single_blog.blog_body|linebreaks }}</div>
+                    <div class="border-top mt-4 pt-3 d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Last updated {{ single_blog.updated_at|timesince }} ago</small>
+                        <a class="btn btn-sm btn-outline-dark" href="mailto:?subject={{ single_blog.title|urlencode }}&body={{ request.build_absolute_uri|urlencode }}"><i class="fa fa-share-alt"></i> Share</a>
                     </div>
                 </div>
-            </div>
-            <!-- Side widget-->
-            {% if social_links %}
-            <div class="card mb-4 p-3">
-                <h4 class="font-italic">Follow Us</h4>
-                <ol class="list-unstyled">
-                    {% for i in social_links %}
-                    <li><a href="{{ i.link }}" target="_blank">{{ i.platform }}</a></li>
-                    {% endfor %}
-                </ol>
-            </div>
-            {% endif %}
+            </article>
+
+            <section id="comments" class="card border-0 shadow-sm mt-4 p-4">
+                <h3>Conversation <span class="badge badge-light">{{ comment_count }}</span></h3>
+                {% if user.is_authenticated %}
+                <form method="POST" class="mb-4">{% csrf_token %}{{ comment_form.body }}{% if comment_form.body.errors %}<div class="text-danger small">{{ comment_form.body.errors }}</div>{% endif %}<button type="submit" class="btn btn-warning mt-2">Post comment</button></form>
+                {% else %}
+                <div class="alert alert-light border">Please <a href="{% url 'login' %}?next={{ request.path|urlencode }}">log in</a> to join the conversation.</div>
+                {% endif %}
+                {% for comment in comments %}
+                <div class="media py-3 {% if not forloop.last %}border-bottom{% endif %}">
+                    <div class="avatar mr-3">{{ comment.user.username|first|upper }}</div>
+                    <div class="media-body"><h6 class="mt-0 mb-1">{{ comment.user.get_full_name|default:comment.user.username }} <small class="text-muted font-weight-normal">· {{ comment.created_at|timesince }} ago</small></h6><div>{{ comment.body|linebreaksbr }}</div></div>
+                </div>
+                {% empty %}<p class="text-muted mb-0">No comments yet. Start the conversation.</p>{% endfor %}
+            </section>
         </div>
+        <aside class="col-lg-4 mt-4 mt-lg-0">
+            {% if related_posts %}<div class="card border-0 shadow-sm mb-4"><div class="card-body"><h4>Related stories</h4>{% for post in related_posts %}<a href="{% url 'blogs' post.slug %}" class="d-block py-3 text-dark {% if not forloop.last %}border-bottom{% endif %}"><strong>{{ post.title }}</strong><small class="d-block text-muted">{{ post.reading_time }} min read · {{ post.views }} views</small></a>{% endfor %}</div></div>{% endif %}
+            <div class="card border-0 shadow-sm mb-4"><div class="card-body"><h4>Explore topics</h4>{% for cat in categories %}<a class="badge badge-light border p-2 mb-1" href="{% url 'posts_by_category' cat.id %}">{{ cat.category_name }}</a>{% endfor %}</div></div>
+        </aside>
     </div>
 </div>
-
 {% endblock %}
