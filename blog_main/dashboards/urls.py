@@ -1,8 +1,14 @@
 from django.urls import path
+from django.views.generic import RedirectView
 from .import views
 
 urlpatterns = [
     path('', views.dashboards, name='dashboard'),
+    path(
+        'admin/',
+        RedirectView.as_view(pattern_name='admin:index', permanent=False),
+        name='dashboard_admin',
+    ),
     # category crud
     path('categories/', views.categories, name = 'categories'),
     path('categories/add/', views.add_category , name = 'add_category'),

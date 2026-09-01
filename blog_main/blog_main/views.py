@@ -9,12 +9,21 @@ from django.contrib import messages
 from django.utils.http import url_has_allowed_host_and_scheme
 
 def home(request):
-    featured_post = Blog.objects.select_related('author', 'Category').filter(
+    featured_post = list(Blog.objects.select_related('author', 'Category').filter(
         is_featured=True, status='Published'
-    ).order_by('-updated_at')
+    ).order_by('-updated_at')[:4])
+    if len(featured_post) < 4:
+        featured_ids = [post.pk for post in featured_post]
+        dynamic_featured = Blog.objects.select_related('author', 'Category').filter(
+            status='Published'
+        ).exclude(pk__in=featured_ids).order_by('-views', '-updated_at')[:4 - len(featured_post)]
+        featured_post.extend(dynamic_featured)
     posts = Blog.objects.select_related('author', 'Category').filter(
         is_featured=False, status='Published'
     )
+    popular_posts = Blog.objects.select_related('author', 'Category').filter(
+        status='Published'
+    ).order_by('-views', '-created_at')[:4]
     
     # fetch about us
     try:
@@ -25,6 +34,7 @@ def home(request):
     context = {
         'featured_post' : featured_post,
         'posts':posts,
+        'popular_posts': popular_posts,
         'about': about,
     }
 

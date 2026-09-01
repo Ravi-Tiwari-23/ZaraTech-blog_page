@@ -1,20 +1,11 @@
 {% extends 'base.html' %}
-
-
+{% block title %}Join GenVilla Insights{% endblock %}
 {% block content %}
 {% load crispy_forms_tags %}
-<h3 class="text-center">Register</h3>
-<form action="{% url 'register' %}" method="POST" style="max-width: 500px; margin: auto;">
-    {% csrf_token %}
-    {{ form | crispy }}
-
-    <button type="submit" class="btn btn-warning">Submit</button>
-</form>
-
-
-
-
-
-
-
+<section class="auth-page">
+    <div class="auth-shell" data-reveal>
+        <div class="auth-story register-story"><span class="eyebrow eyebrow-light">Join the community</span><h1>Make space for better property ideas.</h1><p>Create your account to save articles, follow the topics you care about and take part in the conversation.</p><ul class="auth-benefits"><li><i class="fa fa-check"></i> Save useful stories for later</li><li><i class="fa fa-check"></i> Comment and exchange ideas</li><li><i class="fa fa-check"></i> Discover guides across India</li></ul></div>
+        <div class="auth-form-panel"><a class="brand auth-brand" href="{% url 'home' %}"><span class="brand-mark"><i class="fa fa-building"></i></span><span class="brand-copy">GenVilla <small>Insights</small></span></a><span class="eyebrow">Free membership</span><h2>Create your account</h2><p>A few details and you’re in.</p><form action="{% url 'register' %}" method="POST" class="auth-form">{% csrf_token %}{{ form|crispy }}<button type="submit" class="button button-primary auth-submit">Join GenVilla <i class="fa fa-arrow-right"></i></button></form><div class="auth-switch">Already have an account? <a href="{% url 'login' %}">Log in</a></div></div>
+    </div>
+</section>
 {% endblock %}

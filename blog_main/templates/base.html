@@ -1,84 +1,202 @@
-<!-- Header part-->
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}ZaraTech{% endblock %}</title>
+    <meta name="theme-color" content="#b3292f">
+    <meta name="description" content="{% block meta_description %}Practical property guides, neighbourhood stories and real estate insights from GenVilla.{% endblock %}">
+    <meta property="og:title" content="{% block social_title %}GenVilla Insights{% endblock %}">
+    <meta property="og:description" content="{% block social_description %}Smarter property decisions, made simple.{% endblock %}">
+    <meta property="og:type" content="{% block social_type %}website{% endblock %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    {% block social_image %}
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'images/og.png' %}">
+    <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'images/og.png' %}">
+    {% endblock %}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}GenVilla Insights{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}Smarter property decisions, made simple.{% endblock %}">
+    <title>{% block title %}GenVilla Insights{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
     <link href="https://getbootstrap.com/docs/4.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Playfair+Display:700,900" rel="stylesheet">
-    <link href="{% static 'css/blog.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="{% static 'css/blog.css' %}" rel="stylesheet">
+    {% block extra_head %}{% endblock %}
 </head>
+<body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <div class="reading-progress" aria-hidden="true"><span id="readingProgress"></span></div>
 
-<body class="bg-light">
-    <div class="container">
-        <header class="blog-header py-3 bg-white px-3 mt-3 rounded shadow-sm">
-            <div class="row flex-nowrap justify-content-between align-items-center">
-                <div class="col-4 pt-1">
-                    <a class="blog-header-logo text-dark" href="{% url 'home' %}">ZaraTech</a>
-                </div>
-                <div class="col-4">
-                    <form action="{% url 'search' %}" method="GET">
-                        <div class="input-group">
-                            <input class="form-control" type="text" name="keyword" value="{{ keyword }}"
-                                placeholder="Enter search term..." aria-label="Enter search">
-                            <button type="submit" class="btn btn-warning" id="button-search">Search</button>
-                        </div>
-                    </form>
-                </div>
-                <div class="col-4 d-flex justify-content-end align-items-center">
-                    {% if not user.is_authenticated %}
-                    <a class="btn btn-sm btn-warning" href="{% url 'login' %}">Login</a> &nbsp;
-                    <a class="btn btn-sm btn-outline-secondary" href="{% url 'register' %}">Register</a>
-                    {% else %}
-                    <span class="text-muted mr-3">Hi, {{ user.first_name|default:user.username }}</span>
-                    {% if has_dashboard_access %}
-                    <a class="btn btn-sm btn-outline-dark mr-2" href="{% url 'dashboard' %}">Dashboard</a>
-                    {% endif %}
-                    <a class="btn btn-sm btn-warning" href="{% url 'logout' %}">Logout</a>
-
-                    {% endif %}
+    <header class="site-header">
+        <div class="utility-bar">
+            <div class="site-shell utility-inner">
+                <p><i class="fa fa-map-marker" aria-hidden="true"></i> Smarter property decisions, made simple</p>
+                <div class="utility-links">
+                    <a href="{% url 'home' %}#market-guides">Market guides</a>
+                    {% if user.is_authenticated %}<span>Welcome, {{ user.first_name|default:user.username }}</span>{% endif %}
                 </div>
             </div>
-        </header>
-
-        <div class="nav-scroller py-2 mb-3">
-            <nav class="nav d-flex justify-content-between">
-                {% for cat in categories %}
-                <a class="p-2 text-muted" href="{% url 'posts_by_category' cat.id %}">{{cat.category_name }}</a>
-                {% endfor %}
-
-            </nav>
-
-
-            {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            </div>
-            {% endfor %}
-            {% endif %}
-
-            <!-- Main Content Part -->
-            {% block content %}
-
-            {% endblock %}
-
-            <!-- Footer Part  -->
-
-            <footer class="blog-footer mt-5 py-4 border-top">
-                <p class="text-center text-muted mb-0">Made by ZaRaIT for India</p>
-            </footer>
         </div>
+
+        <div class="site-shell main-nav">
+            <a class="brand" href="{% url 'home' %}" aria-label="GenVilla Insights home">
+                <span class="brand-mark" aria-hidden="true"><i class="fa fa-building"></i></span>
+                <span class="brand-copy">GenVilla <small>Insights</small></span>
+            </a>
+            <form class="header-search" action="{% url 'search' %}" method="GET" role="search">
+                <i class="fa fa-search" aria-hidden="true"></i>
+                <label class="sr-only" for="site-search">Search articles</label>
+                <input id="site-search" type="search" name="keyword" value="{{ keyword }}" placeholder="Search guides, cities, trends...">
+                <button type="submit">Search</button>
+            </form>
+            <div class="account-actions">
+                {% if not user.is_authenticated %}
+                <a class="text-action" href="{% url 'login' %}">Log in</a>
+                <a class="button button-primary button-small" href="{% url 'register' %}">Join free</a>
+                {% else %}
+                    {% if has_dashboard_access %}<a class="text-action" href="{% url 'dashboard' %}">Dashboard</a>{% endif %}
+                    <a class="button button-outline button-small" href="{% url 'logout' %}">Log out</a>
+                {% endif %}
+            </div>
+            <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="mobileMenu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+
+        <div class="category-bar" id="mobileMenu">
+            <nav class="site-shell category-nav" aria-label="Article categories">
+                <a class="category-home" href="{% url 'home' %}"><i class="fa fa-home" aria-hidden="true"></i><span class="sr-only">Home</span></a>
+                {% for cat in categories %}
+                <a href="{% url 'posts_by_category' cat.id %}">{{ cat.category_name }}</a>
+                {% empty %}<a href="{% url 'home' %}#latest">Latest stories</a>{% endfor %}
+            </nav>
+            <form class="mobile-search site-shell" action="{% url 'search' %}" method="GET" role="search">
+                <label class="sr-only" for="mobile-site-search">Search articles</label>
+                <input id="mobile-site-search" type="search" name="keyword" value="{{ keyword }}" placeholder="Search property insights...">
+                <button type="submit" aria-label="Search"><i class="fa fa-search"></i></button>
+            </form>
+        </div>
+    </header>
+
+    {% if messages %}
+    <div class="site-shell messages-wrap" aria-live="polite">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        {% endfor %}
     </div>
+    {% endif %}
+
+    <main id="main-content">{% block content %}{% endblock %}</main>
+
+    <footer class="site-footer">
+        <div class="site-shell footer-grid">
+            <div>
+                <a class="brand brand-light" href="{% url 'home' %}">
+                    <span class="brand-mark"><i class="fa fa-building"></i></span>
+                    <span class="brand-copy">GenVilla <small>Insights</small></span>
+                </a>
+                <p class="footer-intro">Clear, useful property intelligence for buyers, owners and curious city dwellers across India.</p>
+            </div>
+            <div>
+                <h3>Explore</h3>
+                <ul><li><a href="{% url 'home' %}#latest">Latest stories</a></li><li><a href="{% url 'home' %}#market-guides">Market guides</a></li>{% if has_dashboard_access %}<li><a href="{% url 'dashboard' %}">Editorial dashboard</a></li>{% endif %}</ul>
+            </div>
+            <div>
+                <h3>Topics</h3>
+                <ul>{% for cat in categories|slice:":4" %}<li><a href="{% url 'posts_by_category' cat.id %}">{{ cat.category_name }}</a></li>{% empty %}<li><a href="{% url 'home' %}">Property insights</a></li>{% endfor %}</ul>
+            </div>
+            <div>
+                <h3>Stay in the know</h3>
+                <p class="footer-copy">Fresh ideas for better property decisions.</p>
+                {% if social_links %}<div class="social-row">{% for link in social_links %}<a href="{{ link.link }}" target="_blank" rel="noopener" aria-label="{{ link.platform }}">{{ link.platform|first }}</a>{% endfor %}</div>{% endif %}
+            </div>
+        </div>
+        <div class="site-shell footer-bottom"><span>&copy; {% now "Y" %} GenVilla Insights</span><span>Made for modern India</span></div>
+    </footer>
+
+    <button class="back-to-top" type="button" aria-label="Back to top"><i class="fa fa-arrow-up"></i></button>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+    <script>
+        (function () {
+            var menuButton = document.querySelector('.menu-toggle');
+            var mobileMenu = document.getElementById('mobileMenu');
+            if (menuButton && mobileMenu) {
+                menuButton.addEventListener('click', function () {
+                    var open = mobileMenu.classList.toggle('is-open');
+                    menuButton.classList.toggle('is-open', open);
+                    menuButton.setAttribute('aria-expanded', String(open));
+                    menuButton.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+                });
+            }
 
+            var revealItems = document.querySelectorAll('[data-reveal]');
+            if ('IntersectionObserver' in window) {
+                var observer = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); }
+                    });
+                }, { threshold: 0.12 });
+                revealItems.forEach(function (item) { observer.observe(item); });
+            } else { revealItems.forEach(function (item) { item.classList.add('is-visible'); }); }
+
+            var progress = document.getElementById('readingProgress');
+            var topButton = document.querySelector('.back-to-top');
+            function onScroll() {
+                var available = document.documentElement.scrollHeight - window.innerHeight;
+                if (progress) progress.style.width = (available > 0 ? (window.scrollY / available) * 100 : 0) + '%';
+                if (topButton) topButton.classList.toggle('is-visible', window.scrollY > 500);
+            }
+            window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+            if (topButton) topButton.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+            document.querySelectorAll('[data-bookmark]').forEach(function (button) {
+                var key = 'genvilla-bookmark-' + button.getAttribute('data-bookmark');
+                if (localStorage.getItem(key)) button.classList.add('is-saved');
+                button.addEventListener('click', function () {
+                    var saved = button.classList.toggle('is-saved');
+                    if (saved) localStorage.setItem(key, '1'); else localStorage.removeItem(key);
+                    button.setAttribute('aria-label', saved ? 'Remove saved article' : 'Save article');
+                    button.setAttribute('title', saved ? 'Saved' : 'Save for later');
+                });
+            });
+
+            document.querySelectorAll('[data-share]').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var title = button.getAttribute('data-share-title') || document.title;
+                    if (navigator.share) {
+                        navigator.share({ title: title, url: window.location.href }).catch(function () {});
+                    } else if (navigator.clipboard) {
+                        navigator.clipboard.writeText(window.location.href).then(function () {
+                            button.classList.add('is-saved');
+                            button.setAttribute('aria-label', 'Link copied');
+                            setTimeout(function () { button.classList.remove('is-saved'); button.setAttribute('aria-label', 'Share this article'); }, 1800);
+                        });
+                    }
+                });
+            });
+
+            var newsletter = document.querySelector('[data-newsletter]');
+            if (newsletter) newsletter.addEventListener('submit', function (event) {
+                event.preventDefault();
+                var email = newsletter.querySelector('input[type="email"]');
+                var note = newsletter.querySelector('[data-newsletter-note]');
+                if (email && email.checkValidity()) {
+                    localStorage.setItem('genvilla-newsletter-email', email.value);
+                    newsletter.classList.add('is-complete');
+                    if (note) note.textContent = 'You’re on the list — welcome to the neighbourhood.';
+                    email.value = '';
+                } else if (email) email.reportValidity();
+            });
+        })();
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
 </html>

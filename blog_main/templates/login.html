@@ -1,17 +1,11 @@
 {% extends 'base.html' %}
-
-
+{% block title %}Log in | GenVilla Insights{% endblock %}
 {% block content %}
 {% load crispy_forms_tags %}
-
-<h3 class="text-center">Login</h3>
-<form action="{% url 'login' %}" method="POST" style="max-width: 500px; margin: auto;">
-    {% csrf_token %}
-    {% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% endif %}
-    {{ form | crispy }}
-
-    <button type="submit" class="btn btn-warning">Login</button>
-</form>
-
-
+<section class="auth-page">
+    <div class="auth-shell" data-reveal>
+        <div class="auth-story"><span class="eyebrow eyebrow-light">Welcome back</span><h1>Your next smart property decision starts here.</h1><p>Save useful reads, join thoughtful conversations and keep your property knowledge moving.</p><div class="auth-quote"><i class="fa fa-quote-left"></i><span>Clarity is the best place to begin.</span></div></div>
+        <div class="auth-form-panel"><a class="brand auth-brand" href="{% url 'home' %}"><span class="brand-mark"><i class="fa fa-building"></i></span><span class="brand-copy">GenVilla <small>Insights</small></span></a><span class="eyebrow">Member access</span><h2>Log in to your account</h2><p>Good to see you again.</p><form action="{% url 'login' %}" method="POST" class="auth-form">{% csrf_token %}{% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% endif %}{{ form|crispy }}<button type="submit" class="button button-primary auth-submit">Log in <i class="fa fa-arrow-right"></i></button></form><div class="auth-switch">New to GenVilla? <a href="{% url 'register' %}">Create a free account</a></div></div>
+    </div>
+</section>
 {% endblock %}

@@ -1,1 +1,3 @@
-<p>Page not found</p>
+{% extends 'base.html' %}
+{% block title %}Page not found | GenVilla Insights{% endblock %}
+{% block content %}<section class="not-found site-shell" data-reveal><span class="not-found-number">404</span><span class="eyebrow">Lost the address?</span><h1>This page has moved out.</h1><p>The story you’re looking for may have a new home. Let’s get you back to the neighbourhood.</p><a href="{% url 'home' %}" class="button button-primary"><i class="fa fa-home"></i> Go to homepage</a></section>{% endblock %}

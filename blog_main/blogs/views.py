@@ -61,12 +61,16 @@ def blogs(request, slug):
     related_posts = Blog.objects.filter(
         Category=single_blog.Category, status='Published'
     ).exclude(pk=single_blog.pk)[:3]
+    popular_posts = Blog.objects.select_related('author', 'Category').filter(
+        status='Published'
+    ).exclude(pk=single_blog.pk).order_by('-views', '-created_at')[:4]
     context = {
         'single_blog': single_blog,
         'comments': comments,
         'comment_count': comments.count(),
         'comment_form': comment_form,
         'related_posts': related_posts,
+        'popular_posts': popular_posts,
     }
     return render(request , 'blogs.html' , context)
 

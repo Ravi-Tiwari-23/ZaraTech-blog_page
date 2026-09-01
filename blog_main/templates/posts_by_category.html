@@ -1,37 +1,18 @@
 {% extends 'base.html' %}
+{% block title %}{{ category_name }} Articles | GenVilla Insights{% endblock %}
 {% block content %}
-
-
-
-
-
-
-<!-- featured posts-->
-<h3 class="text-uppercase text-warning" style="letter-spacing: 2px">
-    CATEGORY - {{category_name}}
-</h3>
-
-<div class="row mb-2">
-    {% if posts %}
-    {% for post in posts %}
-    <div class="col-md-6">
-        <div class="card border-0">
-            <div class="card-body">
-                <h3><a href="{% url 'blogs' post.slug %}" class="text-dark">{{ post.title }}</a> </h3>
-                <small class="mb-1 text-muted">{{ post.created_at | timesince }} ago |
-                    {{ post.author}} · <i class="fa fa-eye"></i> {{ post.views }} · {{ post.reading_time }} min read</small>
-                <p class="card-text" style="min-height:120px;">
-                    {{ post.short_description | truncatewords:35 }}
-                </p>
-            </div>
-        </div>
+<section class="archive-hero">
+    <div class="site-shell" data-reveal><span class="eyebrow eyebrow-light">Explore by topic</span><h1>{{ category_name }}</h1><p>Fresh perspectives, practical guides and useful ideas selected for you.</p></div>
+</section>
+<section class="site-shell archive-section">
+    <div class="archive-toolbar" data-reveal><h2>Latest in {{ category_name }}</h2><span>{{ posts|length }} stor{{ posts|length|pluralize:"y,ies" }}</span></div>
+    <div class="archive-grid">
+        {% for post in posts %}
+        <article class="story-card" data-reveal style="--delay: {{ forloop.counter0 }}50ms">
+            <a class="story-image" href="{% url 'blogs' post.slug %}">{% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.title }}" loading="lazy">{% endif %}<span class="image-category">{{ category_name }}</span></a>
+            <div class="story-card-body"><div class="story-meta"><span>{{ post.created_at|date:'M d, Y' }}</span><span>{{ post.reading_time }} min read</span></div><h3><a href="{% url 'blogs' post.slug %}">{{ post.title }}</a></h3><p>{{ post.short_description|truncatewords:23 }}</p><div class="card-actions"><a class="story-link" href="{% url 'blogs' post.slug %}">Read article <i class="fa fa-long-arrow-right"></i></a><button class="bookmark-button" data-bookmark="{{ post.slug }}" type="button" aria-label="Save article"><i class="fa fa-bookmark-o"></i></button></div></div>
+        </article>
+        {% empty %}<div class="empty-state archive-empty"><i class="fa fa-folder-open-o"></i><h3>No stories here yet</h3><p>Explore another topic or check back soon.</p><a href="{% url 'home' %}" class="button button-primary">Back to all stories</a></div>{% endfor %}
     </div>
-
-    {%endfor%}
-    {% else %}
-    <p>No Posts Found</p>
-    {% endif %}
-
-</div>
-</div>
+</section>
 {% endblock %}
