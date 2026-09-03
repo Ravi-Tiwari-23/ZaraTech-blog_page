@@ -146,8 +146,13 @@ def delete_post(request, pk):
 
 @manager_required
 def users(request):
-    users_list = User.objects.prefetch_related('groups').order_by('username')
-    return render(request, 'dashboard/users.html', {'users_list': users_list})
+    users_list = User.objects.all().order_by('username')
+
+    return render(
+        request,
+        'dashboard/users.html',
+        {'users_list': users_list}
+    )
 
 
 @manager_required

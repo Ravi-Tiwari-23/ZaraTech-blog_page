@@ -1,8 +1,20 @@
-asgiref==3.11.1
-crispy-bootstrap4==2025.6
-django==4.2.30
+# Web framework and UI
+Django==5.2.17
+django-mongodb-backend>=5.2,<5.3
+python-dotenv==1.2.3
 django-crispy-forms==2.5
-pillow==11.3.0
-sqlparse==0.5.5
-typing-extensions==4.16.0
-tzdata==2026.3
+crispy-bootstrap4==2025.6
+
+# Database configuration and Aurora PostgreSQL driver
+dj-database-url==3.1.2
+psycopg[binary]==3.3.4
+
+# Production WSGI server and static-file middleware
+gunicorn==26.2.0
+whitenoise[brotli]==6.12.0
+
+# Image uploads
+Pillow==11.3.0
+
+cloudinary
+django-cloudinary-storage

@@ -1,0 +1,95 @@
+from .settings import *
+import os
+
+INSTALLED_APPS = [
+    'blog_main.apps.MongoAdminConfig',
+    'blog_main.apps.MongoAuthConfig',
+    'blog_main.apps.MongoContentTypesConfig',
+
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+
+    'django_mongodb_backend',
+
+    'cloudinary_storage',
+    'cloudinary',
+
+    'blogs.apps.MongoBlogsConfig',
+    'assignments.apps.MongoAssignmentsConfig',
+    'crispy_forms',
+    'crispy_bootstrap4',
+    'dashboards',
+]
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django_mongodb_backend",
+        "HOST": os.environ.get("MONGODB_URI"),
+        "NAME": os.environ.get("MONGODB_NAME", "genvilla_db"),
+    }
+}
+
+# ==========================================
+# CLOUDINARY
+# ==========================================
+
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    "API_KEY": os.environ.get("CLOUDINARY_API_KEY"),
+    "API_SECRET": os.environ.get("CLOUDINARY_API_SECRET"),
+}
+
+DEFAULT_AUTO_FIELD = "django_mongodb_backend.fields.ObjectIdAutoField"
+
+MIGRATION_MODULES = {
+    "admin": "mongo_migrations.admin",
+    "auth": "mongo_migrations.auth",
+    "contenttypes": "mongo_migrations.contenttypes",
+    "dashboards": "mongo_migrations.dashboards",
+    "blogs": "mongo_migrations.blogs",
+    "assignments": "mongo_migrations.assignments",
+}
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() == "true"
+
+ALLOWED_HOSTS = os.environ.get(
+    "DJANGO_ALLOWED_HOSTS",
+    "127.0.0.1,localhost"
+).split(",")
+
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
+    if origin.strip()
+]
+
+STATIC_URL = "/static/"
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+"django.middleware.security.SecurityMiddleware",
+
+"whitenoise.middleware.WhiteNoiseMiddleware",
+
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+    SECURE_SSL_REDIRECT = True
+
+    SECURE_HSTS_SECONDS = 3600
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = "DENY"
