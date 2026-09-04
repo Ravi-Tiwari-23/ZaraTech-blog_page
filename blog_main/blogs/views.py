@@ -33,37 +33,87 @@ def posts_by_category(request, category_id):
     return render(request, 'posts_by_category.html', context)
 
 def blogs(request, slug):
-    single_blog = get_object_or_404(Blog, slug = slug, status = 'Published')
+    single_blog = get_object_or_404(
+        Blog,
+        slug=slug,
+        status='Published'
+    )
+
+    # MongoDB ObjectId must be converted to string before
+    # storing it in the Django session.
+    blog_id = str(single_blog.pk)
 
     viewed_posts = request.session.get('viewed_posts', [])
-    if single_blog.pk not in viewed_posts:
-        Blog.objects.filter(pk=single_blog.pk).update(views=F('views') + 1)
-        viewed_posts.append(single_blog.pk)
+
+    if blog_id not in viewed_posts:
+        Blog.objects.filter(pk=single_blog.pk).update(
+            views=F('views') + 1
+        )
+
+        viewed_posts.append(blog_id)
+
         request.session['viewed_posts'] = viewed_posts[-100:]
+
         single_blog.refresh_from_db(fields=['views'])
 
+    # -----------------------------------------------------
+    # COMMENTS
+    # -----------------------------------------------------
+
     if request.method == 'POST':
+
         if not request.user.is_authenticated:
-            messages.warning(request, 'Please log in to write a comment.')
-            return redirect(f"{reverse('login')}?next={request.path}")
+            messages.warning(
+                request,
+                'Please log in to write a comment.'
+            )
+
+            return redirect(
+                f"{reverse('login')}?next={request.path}"
+            )
+
         comment_form = CommentForm(request.POST)
+
         if comment_form.is_valid():
             comment = comment_form.save(commit=False)
             comment.blog = single_blog
             comment.user = request.user
             comment.save()
-            messages.success(request, 'Your comment was added.')
-            return redirect(f"{request.path}#comments")
+
+            messages.success(
+                request,
+                'Your comment was added.'
+            )
+
+            return redirect(
+                f"{request.path}#comments"
+            )
+
     else:
         comment_form = CommentForm()
 
-    comments = single_blog.comments.filter(is_approved=True).select_related('user')
+    # Do not use select_related() with MongoDB backend.
+    comments = single_blog.comments.filter(
+        is_approved=True
+    )
+
     related_posts = Blog.objects.filter(
-        Category=single_blog.Category, status='Published'
-    ).exclude(pk=single_blog.pk)[:3]
-    popular_posts = Blog.objects.select_related('author', 'Category').filter(
+        Category=single_blog.Category,
         status='Published'
-    ).exclude(pk=single_blog.pk).order_by('-views', '-created_at')[:4]
+    ).exclude(
+        pk=single_blog.pk
+    )[:3]
+
+    # Do not use select_related() here either.
+    popular_posts = Blog.objects.filter(
+        status='Published'
+    ).exclude(
+        pk=single_blog.pk
+    ).order_by(
+        '-views',
+        '-created_at'
+    )[:4]
+
     context = {
         'single_blog': single_blog,
         'comments': comments,
@@ -72,7 +122,12 @@ def blogs(request, slug):
         'related_posts': related_posts,
         'popular_posts': popular_posts,
     }
-    return render(request , 'blogs.html' , context)
+
+    return render(
+        request,
+        'blogs.html',
+        context
+    )
 
 def search(request):
     keyword = request.GET.get('keyword', '').strip()
