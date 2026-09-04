@@ -1,3 +1,5 @@
 {% extends 'base.html' %}
 {% block title %}Page not found | GenVilla Insights{% endblock %}
-{% block content %}<section class="not-found site-shell" data-reveal><span class="not-found-number">404</span><span class="eyebrow">Lost the address?</span><h1>This page has moved out.</h1><p>The story you’re looking for may have a new home. Let’s get you back to the neighbourhood.</p><a href="{% url 'home' %}" class="button button-primary"><i class="fa fa-home"></i> Go to homepage</a></section>{% endblock %}
+{% block meta_description %}The requested page could not be found on GenVilla Insights.{% endblock %}
+{% block robots %}noindex, follow{% endblock %}
+{% block content %}<section class="not-found site-shell" data-reveal><span class="not-found-number">404</span><span class="eyebrow">Lost the address?</span><h1>This page has moved out.</h1><p>The story you’re looking for may have a new home. Search our property guides or head back to the neighbourhood.</p><div class="error-actions"><a href="{% url 'home' %}" class="button button-primary"><i class="fa fa-home" aria-hidden="true"></i> Go to homepage</a><a href="{% url 'search' %}" class="button button-outline"><i class="fa fa-search" aria-hidden="true"></i> Search articles</a></div></section>{% endblock %}

@@ -1,6 +1,8 @@
 from django.contrib.auth.models import Group, User
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.template.loader import render_to_string
+from django.test import RequestFactory
 
 from .models import Blog, Category, Comment
 
@@ -51,6 +53,55 @@ class BlogFeatureTests(TestCase):
         response = self.client.post(url, {'body': 'Authenticated comment'})
         self.assertRedirects(response, f'{url}#comments', fetch_redirect_response=False)
         self.assertTrue(Comment.objects.filter(body='Authenticated comment').exists())
+
+    def test_article_has_canonical_social_and_structured_metadata(self):
+        response = self.client.get(reverse('blogs', args=[self.post.slug]))
+
+        self.assertContains(response, '<link rel="canonical"', html=False)
+        self.assertContains(response, 'application/ld+json')
+        self.assertContains(response, 'article:published_time')
+
+    def test_sitemap_only_includes_published_articles(self):
+        draft = Blog.objects.create(
+            title='Private draft',
+            Category=self.category,
+            author=self.author,
+            short_description='Not ready',
+            blog_body='Draft body',
+            status='Draft',
+        )
+
+        response = self.client.get(reverse('django.contrib.sitemaps.views.sitemap'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse('blogs', args=[self.post.slug]))
+        self.assertNotContains(response, reverse('blogs', args=[draft.slug]))
+
+    def test_robots_and_error_templates_are_safe(self):
+        robots = self.client.get(reverse('robots_txt'))
+        rendered_500 = render_to_string('500.html')
+
+        self.assertContains(robots, 'Allow: /')
+        self.assertContains(robots, 'Disallow: /dashboard/')
+        self.assertIn('Something unexpected happened', rendered_500)
+        self.assertNotIn('traceback', rendered_500.lower())
+
+    def test_custom_500_is_branded_and_safe(self):
+        from blog_main.views import custom_500
+
+        response = custom_500(RequestFactory().get('/broken/'))
+
+        self.assertEqual(response.status_code, 500)
+        self.assertIn(b'GenVilla Insights', response.content)
+        self.assertNotIn(b'traceback', response.content.lower())
+
+    @override_settings(DEBUG=False)
+    def test_custom_404_is_branded(self):
+        response = self.client.get('/this-page-does-not-exist/')
+
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(response, 'Page not found | GenVilla Insights', status_code=404)
+        self.assertContains(response, 'Search articles', status_code=404)
 
 
 class DashboardPermissionTests(TestCase):

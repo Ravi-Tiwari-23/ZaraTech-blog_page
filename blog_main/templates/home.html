@@ -1,12 +1,14 @@
 {% extends 'base.html' %}
+{% block title %}GenVilla Insights | Practical Property Guides & Real Estate Ideas{% endblock %}
+{% block meta_description %}Clear property guides, market perspectives and practical real estate insights for buyers, owners and curious city dwellers across India.{% endblock %}
 {% block content %}
 <section class="hero-section site-shell">
     {% if featured_post %}
-    <div class="hero-slider" data-featured-slider data-reveal>
+    <div class="hero-slider" data-featured-slider data-reveal role="region" aria-roledescription="carousel" aria-label="Featured property stories">
         {% for post in featured_post %}
         <article class="hero-story hero-slide{% if forloop.first %} is-active{% endif %}" data-slide="{{ forloop.counter0 }}" aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}">
             <a class="hero-media" href="{% url 'blogs' post.slug %}" aria-label="Read {{ post.title }}">
-                {% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.title }}"{% if not forloop.first %} loading="lazy"{% endif %}>{% endif %}
+                {% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.title }}" decoding="async"{% if forloop.first %} fetchpriority="high"{% else %} loading="lazy"{% endif %}>{% endif %}
                 <span class="hero-shade"></span>
             </a>
             <div class="hero-content">
@@ -19,13 +21,13 @@
         </article>
         {% endfor %}
         {% if featured_post|length > 1 %}
-        <div class="hero-controls" aria-label="Featured stories controls">
-            <button type="button" data-slider-prev aria-label="Previous featured story"><i class="fa fa-angle-left"></i></button>
+        <div class="hero-controls" role="group" aria-label="Featured stories controls">
+            <button type="button" data-slider-prev aria-label="Previous featured story"><i class="fa fa-angle-left" aria-hidden="true"></i></button>
             <div class="hero-dots">
                 {% for post in featured_post %}<button type="button" data-slider-dot="{{ forloop.counter0 }}" class="{% if forloop.first %}is-active{% endif %}" aria-label="Show featured story {{ forloop.counter }}"></button>{% endfor %}
             </div>
-            <span class="hero-counter"><strong data-slider-current>01</strong> / {{ featured_post|length|stringformat:"02d" }}</span>
-            <button type="button" data-slider-next aria-label="Next featured story"><i class="fa fa-angle-right"></i></button>
+            <span class="hero-counter" aria-live="polite"><strong data-slider-current>01</strong> / {{ featured_post|length|stringformat:"02d" }}</span>
+            <button type="button" data-slider-next aria-label="Next featured story"><i class="fa fa-angle-right" aria-hidden="true"></i></button>
         </div>
         {% endif %}
     </div>
@@ -126,12 +128,7 @@
                     <span class="eyebrow eyebrow-light">The Sunday Address</span>
                     <h3>One thoughtful property read, weekly.</h3>
                     <p>No clutter. Just useful market signals and better-living ideas.</p>
-                    <form data-newsletter class="newsletter-form">
-                        <label class="sr-only" for="newsletter-email">Email address</label>
-                        <input id="newsletter-email" type="email" placeholder="you@example.com" required>
-                        <button type="submit" aria-label="Subscribe"><i class="fa fa-arrow-right"></i></button>
-                        <small data-newsletter-note>Free. Unsubscribe whenever you like.</small>
-                    </form>
+                    <p class="newsletter-status"><i class="fa fa-clock-o" aria-hidden="true"></i> Newsletter subscriptions are coming soon.</p>
                 </div>
                 {% if categories %}
                 <div class="sidebar-panel topic-panel" data-reveal>
@@ -162,11 +159,20 @@
                 var active = position === activeIndex;
                 slide.classList.toggle('is-active', active);
                 slide.setAttribute('aria-hidden', String(!active));
+                slide.querySelectorAll('a, button').forEach(function (control) { control.tabIndex = active ? 0 : -1; });
             });
-            dots.forEach(function (dot, position) { dot.classList.toggle('is-active', position === activeIndex); });
+            dots.forEach(function (dot, position) {
+                var active = position === activeIndex;
+                dot.classList.toggle('is-active', active);
+                dot.setAttribute('aria-current', active ? 'true' : 'false');
+            });
             if (currentLabel) currentLabel.textContent = String(activeIndex + 1).padStart(2, '0');
         }
-        function startSlider() { window.clearInterval(timer); timer = window.setInterval(function () { showSlide(activeIndex + 1); }, 6000); }
+        function startSlider() {
+            window.clearInterval(timer);
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            timer = window.setInterval(function () { showSlide(activeIndex + 1); }, 6000);
+        }
 
         slider.querySelector('[data-slider-prev]').addEventListener('click', function () { showSlide(activeIndex - 1); startSlider(); });
         slider.querySelector('[data-slider-next]').addEventListener('click', function () { showSlide(activeIndex + 1); startSlider(); });
@@ -175,6 +181,11 @@
         slider.addEventListener('mouseleave', startSlider);
         slider.addEventListener('focusin', function () { window.clearInterval(timer); });
         slider.addEventListener('focusout', startSlider);
+        slider.addEventListener('keydown', function (event) {
+            if (event.key === 'ArrowLeft') { showSlide(activeIndex - 1); startSlider(); }
+            if (event.key === 'ArrowRight') { showSlide(activeIndex + 1); startSlider(); }
+        });
+        showSlide(0);
         startSlider();
     })();
 </script>

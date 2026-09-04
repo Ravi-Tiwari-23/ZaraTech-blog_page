@@ -1,5 +1,7 @@
 
 from django.shortcuts import redirect, render
+from django.http import HttpResponseServerError
+from django.template.loader import get_template
 from blogs.models import Category , Blog
 from assignments.models import About
 from .forms import RegistrationForm
@@ -84,3 +86,14 @@ def logout(request):
     auth.logout(request)
     
     return redirect('home')
+
+
+def custom_404(request, exception):
+    return render(request, '404.html', status=404)
+
+
+def custom_500(request):
+    # Render without request context processors so the branded fallback still
+    # works if the database itself is unavailable.
+    content = get_template('500.html').render({'request': request})
+    return HttpResponseServerError(content)

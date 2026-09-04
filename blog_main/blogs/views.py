@@ -28,6 +28,7 @@ def posts_by_category(request, category_id):
     
     context = {
         'posts': posts,
+        'category': category,
         'category_name': category.category_name,
     }
     return render(request, 'posts_by_category.html', context)
@@ -116,6 +117,7 @@ def blogs(request, slug):
 
     context = {
         'single_blog': single_blog,
+        'social_image_url': request.build_absolute_uri(single_blog.featured_image.url) if single_blog.featured_image else '',
         'comments': comments,
         'comment_count': comments.count(),
         'comment_form': comment_form,

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}{{ single_blog.title }} | GenVilla Insights{% endblock %}
 {% block meta_description %}{{ single_blog.short_description|truncatechars:160 }}{% endblock %}
 {% block social_title %}{{ single_blog.title }} | GenVilla Insights{% endblock %}
@@ -6,7 +7,26 @@
 {% block social_description %}{{ single_blog.short_description|truncatechars:160 }}{% endblock %}
 {% block twitter_description %}{{ single_blog.short_description|truncatechars:160 }}{% endblock %}
 {% block social_type %}article{% endblock %}
-{% block social_image %}{% if single_blog.featured_image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ single_blog.featured_image.url }}"><meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{{ single_blog.featured_image.url }}">{% endif %}{% endblock %}
+{% block social_image %}{% if social_image_url %}<meta property="og:image" content="{{ social_image_url }}"><meta property="og:image:alt" content="{{ single_blog.title }}"><meta name="twitter:image" content="{{ social_image_url }}"><meta name="twitter:image:alt" content="{{ single_blog.title }}">{% endif %}{% endblock %}
+{% block extra_head %}
+<meta property="article:published_time" content="{{ single_blog.created_at|date:'c' }}">
+<meta property="article:modified_time" content="{{ single_blog.updated_at|date:'c' }}">
+<meta property="article:section" content="{{ single_blog.Category.category_name }}">
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "{{ single_blog.title|escapejs }}",
+    "description": "{{ single_blog.short_description|striptags|truncatechars:160|escapejs }}",
+    "datePublished": "{{ single_blog.created_at|date:'c' }}",
+    "dateModified": "{{ single_blog.updated_at|date:'c' }}",
+    "mainEntityOfPage": {"@type": "WebPage", "@id": "{{ request.scheme }}://{{ request.get_host }}{{ request.path|escapejs }}"},
+    "author": {"@type": "Person", "name": "{{ single_blog.author.get_full_name|default:single_blog.author.username|escapejs }}"},
+    "publisher": {"@type": "Organization", "name": "GenVilla Insights"}{% if social_image_url %},
+    "image": ["{{ social_image_url|escapejs }}"]{% endif %}
+}
+</script>
+{% endblock %}
 {% block content %}
 <article class="article-page">
     <div class="site-shell article-breadcrumb" data-reveal>
@@ -23,19 +43,19 @@
             <div class="author-avatar">{{ single_blog.author.username|first|upper }}</div>
             <div><strong>{{ single_blog.author.get_full_name|default:single_blog.author.username }}</strong><small>Property contributor</small></div>
             <span class="byline-divider"></span>
-            <div class="article-facts"><span>{{ single_blog.created_at|date:'M d, Y' }}</span><span>{{ single_blog.reading_time }} min read</span><span><i class="fa fa-eye"></i> {{ single_blog.views }} views</span></div>
+            <div class="article-facts"><span>Published <time datetime="{{ single_blog.created_at|date:'c' }}">{{ single_blog.created_at|date:'M d, Y' }}</time></span><span>Updated <time datetime="{{ single_blog.updated_at|date:'c' }}">{{ single_blog.updated_at|date:'M d, Y' }}</time></span><span>{{ single_blog.reading_time }} min read</span><span><i class="fa fa-eye" aria-hidden="true"></i> {{ single_blog.views }} views</span></div>
         </div>
     </header>
 
     {% if single_blog.featured_image %}
-    <figure class="site-shell article-hero" data-reveal><img src="{{ single_blog.featured_image.url }}" alt="{{ single_blog.title }}"></figure>
+    <figure class="site-shell article-hero" data-reveal><img src="{{ single_blog.featured_image.url }}" alt="{{ single_blog.title }}" decoding="async" fetchpriority="high"></figure>
     {% endif %}
 
     <div class="site-shell article-layout">
         <aside class="article-tools" aria-label="Article actions">
             <span>Share</span>
-            <button type="button" data-share data-share-title="{{ single_blog.title|escape }}" aria-label="Share this article"><i class="fa fa-share-alt"></i></button>
-            <button type="button" data-bookmark="{{ single_blog.slug }}" class="bookmark-button" aria-label="Save article" title="Save for later"><i class="fa fa-bookmark-o"></i></button>
+            <button type="button" data-share data-share-title="{{ single_blog.title|escape }}" aria-label="Share this article"><i class="fa fa-share-alt" aria-hidden="true"></i></button>
+            <button type="button" data-bookmark="{{ single_blog.slug }}" class="bookmark-button" aria-label="Save article" title="Save for later"><i class="fa fa-bookmark-o" aria-hidden="true"></i></button>
         </aside>
 
         <div class="article-column">
@@ -47,18 +67,18 @@
             </section>
 
             <section id="comments" class="comments-section" data-reveal>
-                <div class="comments-heading"><div><span class="eyebrow">Community</span><h2>Join the conversation</h2></div><span class="comment-count">{{ comment_count }}</span></div>
+                <div class="comments-heading"><div><span class="eyebrow">Community</span><h2>Join the conversation</h2></div><span class="comment-count" aria-label="{{ comment_count }} comment{{ comment_count|pluralize }}">{{ comment_count }}</span></div>
                 {% if user.is_authenticated %}
-                <form method="POST" class="comment-form">{% csrf_token %}{{ comment_form.body }}{% if comment_form.body.errors %}<div class="text-danger small">{{ comment_form.body.errors }}</div>{% endif %}<button type="submit" class="button button-primary">Post comment</button></form>
+                <form method="POST" class="comment-form">{% csrf_token %}<label class="sr-only" for="{{ comment_form.body.id_for_label }}">Your comment</label>{{ comment_form.body }}{% if comment_form.body.errors %}<div class="form-errors" role="alert">{{ comment_form.body.errors }}</div>{% endif %}<button type="submit" class="button button-primary">Post comment</button></form>
                 {% else %}
                 <div class="login-prompt"><i class="fa fa-comment-o"></i><div><strong>Have a perspective to add?</strong><p>Log in to share it with the GenVilla community.</p></div><a class="button button-outline button-small" href="{% url 'login' %}?next={{ request.path|urlencode }}">Log in</a></div>
                 {% endif %}
                 <div class="comment-list">
                     {% for comment in comments %}
-                    <div class="comment-item">
+                    <article class="comment-item">
                         <div class="author-avatar">{{ comment.user.username|first|upper }}</div>
-                        <div><h3>{{ comment.user.get_full_name|default:comment.user.username }}</h3><small>{{ comment.created_at|timesince }} ago</small><div class="comment-copy">{{ comment.body|linebreaksbr }}</div></div>
-                    </div>
+                        <div><h3>{{ comment.user.get_full_name|default:comment.user.username }}</h3><small><time datetime="{{ comment.created_at|date:'c' }}">{{ comment.created_at|timesince }} ago</time></small><div class="comment-copy">{{ comment.body|linebreaksbr }}</div></div>
+                    </article>
                     {% empty %}<div class="no-comments"><i class="fa fa-comments-o"></i><p>No comments yet. Be the first to start a thoughtful conversation.</p></div>{% endfor %}
                 </div>
             </section>
@@ -69,7 +89,7 @@
             <div class="related-panel" data-reveal><span class="eyebrow">Continue reading</span><h2>Related stories</h2>
                 {% for post in related_posts %}
                 <a href="{% url 'blogs' post.slug %}" class="related-story">
-                    {% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="" loading="lazy">{% endif %}
+                    {% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.title }}" loading="lazy" decoding="async">{% endif %}
                     <span><strong>{{ post.title }}</strong><small>{{ post.reading_time }} min read</small></span>
                 </a>
                 {% endfor %}
@@ -81,7 +101,7 @@
                 {% for post in popular_posts %}
                 <a href="{% url 'blogs' post.slug %}" class="article-popular-story">
                     <span class="article-popular-rank">0{{ forloop.counter }}</span>
-                    <span class="article-popular-image">{% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="" loading="lazy">{% endif %}</span>
+                    <span class="article-popular-image">{% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.title }}" loading="lazy" decoding="async">{% endif %}</span>
                     <span class="article-popular-copy"><strong>{{ post.title }}</strong><small><i class="fa fa-eye"></i> {{ post.views }} · {{ post.reading_time }} min</small></span>
                 </a>
                 {% endfor %}
