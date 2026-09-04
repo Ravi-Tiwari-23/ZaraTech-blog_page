@@ -1,4 +1,5 @@
 from django import forms
+from assignments.models import About, SocialLink
 from blogs.models import Category, Blog
 from django.contrib.auth.models import Group, User
 from django.contrib.auth.forms import UserCreationForm
@@ -22,6 +23,21 @@ class BlogPostForm(forms.ModelForm):
             'status',
             'is_featured',
         )
+
+
+class AboutForm(forms.ModelForm):
+    class Meta:
+        model = About
+        fields = ('about_heading', 'about_description')
+        widgets = {
+            'about_description': forms.Textarea(attrs={'rows': 8}),
+        }
+
+
+class SocialLinkForm(forms.ModelForm):
+    class Meta:
+        model = SocialLink
+        fields = ('platform', 'link')
 
 
 ROLE_CHOICES = (

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}About | GenVilla Dashboard{% endblock %}
+{% block content %}
+<div class="row">
+    {% include 'dashboard/sidebar.html' %}
+    <div class="col-md-9">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2 class="mb-0">About</h2>
+                <small class="text-muted">Manage the About section shown on the public homepage.</small>
+            </div>
+        </div>
+        {% if multiple_about_records %}
+        <div class="alert alert-warning" role="alert">
+            Multiple About records exist. This form edits the most recently updated record; no records were deleted.
+        </div>
+        {% endif %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-warning">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

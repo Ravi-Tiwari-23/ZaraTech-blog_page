@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Delete Comment | GenVilla Dashboard{% endblock %}
+{% block content %}
+<div class="row">
+    {% include 'dashboard/sidebar.html' %}
+    <div class="col-md-9">
+        <h2>Delete Comment</h2>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <p>Delete this comment by <strong>{{ comment.user.username }}</strong> on <strong>{{ comment.blog.title }}</strong>?</p>
+                <blockquote class="p-3 bg-light rounded">{{ comment.body|linebreaksbr }}</blockquote>
+                <form method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Comment</button>
+                    <a href="{% url 'dashboard_comment_detail' comment.pk %}" class="btn btn-light ml-2">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

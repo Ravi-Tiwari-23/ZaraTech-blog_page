@@ -12,6 +12,12 @@
         <a href="{% url 'users' %}"
             class="nav-link text-dark {% if '/users' in request.path %}bg-warning{% endif %}">Users</a>
         {% endif %}
+        <a href="{% url 'dashboard_about' %}"
+            class="nav-link text-dark {% if '/about/' in request.path %}bg-warning{% endif %}">About</a>
+        <a href="{% url 'dashboard_social_links' %}"
+            class="nav-link text-dark {% if '/social-links/' in request.path %}bg-warning{% endif %}">Social Links</a>
+        <a href="{% url 'dashboard_comments' %}"
+            class="nav-link text-dark {% if '/comments/' in request.path %}bg-warning{% endif %}">Comments</a>
         <a href="{% url 'logout' %}" class="nav-link text-dark">Logout</a>
 
 

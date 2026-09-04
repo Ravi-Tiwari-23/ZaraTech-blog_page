@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Comments | GenVilla Dashboard{% endblock %}
+{% block content %}
+<div class="row">
+    {% include 'dashboard/sidebar.html' %}
+    <div class="col-md-9">
+        <div class="mb-3">
+            <h2 class="mb-1">Comments</h2>
+            <small class="text-muted">Review and moderate reader comments.</small>
+        </div>
+        <div class="btn-group mb-3" role="group" aria-label="Comment status filters">
+            <a href="{% url 'dashboard_comments' %}" class="btn {% if status_filter == 'all' %}btn-dark{% else %}btn-light{% endif %}">All</a>
+            <a href="{% url 'dashboard_comments' %}?status=approved" class="btn {% if status_filter == 'approved' %}btn-dark{% else %}btn-light{% endif %}">Approved</a>
+            <a href="{% url 'dashboard_comments' %}?status=unapproved" class="btn {% if status_filter == 'unapproved' %}btn-dark{% else %}btn-light{% endif %}">Unapproved</a>
+        </div>
+        <div class="table-responsive card border-0 shadow-sm">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr><th>User</th><th>Article</th><th>Comment</th><th>Status</th><th>Date</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    {% for comment in page_obj %}
+                    <tr>
+                        <td><strong>{{ comment.user.username }}</strong></td>
+                        <td>{{ comment.blog.title|truncatechars:55 }}</td>
+                        <td>{{ comment.body|truncatechars:110 }}</td>
+                        <td>{% if comment.is_approved %}<span class="badge badge-success">Approved</span>{% else %}<span class="badge badge-secondary">Unapproved</span>{% endif %}</td>
+                        <td class="text-nowrap">{{ comment.created_at|date:'M d, Y' }}</td>
+                        <td class="text-nowrap">
+                            <a href="{% url 'dashboard_comment_detail' comment.pk %}" class="mr-2">View</a>
+                            {% if comment.is_approved %}
+                            <form action="{% url 'dashboard_comment_unapprove' comment.pk %}" method="POST" class="d-inline">
+                                {% csrf_token %}<button type="submit" class="btn btn-link p-0 mr-2">Unapprove</button>
+                            </form>
+                            {% else %}
+                            <form action="{% url 'dashboard_comment_approve' comment.pk %}" method="POST" class="d-inline">
+                                {% csrf_token %}<button type="submit" class="btn btn-link text-success p-0 mr-2">Approve</button>
+                            </form>
+                            {% endif %}
+                            {% if is_manager %}<a href="{% url 'dashboard_comment_delete' comment.pk %}" class="text-danger">Delete</a>{% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-muted">No comments match this filter.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if page_obj.paginator.num_pages > 1 %}
+        <nav class="mt-3" aria-label="Comments pagination">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?status={{ status_filter }}&amp;page={{ page_obj.previous_page_number }}">Previous</a></li>{% endif %}
+                <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?status={{ status_filter }}&amp;page={{ page_obj.next_page_number }}">Next</a></li>{% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

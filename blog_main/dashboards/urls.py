@@ -28,4 +28,20 @@ urlpatterns = [
     path('users/add/', views.add_user, name='add_user'),
     path('users/edit/<str:pk>/', views.edit_user, name='edit_user'),
     path('users/delete/<str:pk>/', views.delete_user, name='delete_user'),
+
+    # About section
+    path('about/', views.dashboard_about, name='dashboard_about'),
+
+    # Social link CRUD
+    path('social-links/', views.dashboard_social_links, name='dashboard_social_links'),
+    path('social-links/add/', views.dashboard_add_social_link, name='dashboard_add_social_link'),
+    path('social-links/edit/<str:pk>/', views.dashboard_edit_social_link, name='dashboard_edit_social_link'),
+    path('social-links/delete/<str:pk>/', views.dashboard_delete_social_link, name='dashboard_delete_social_link'),
+
+    # Comment moderation
+    path('comments/', views.dashboard_comments, name='dashboard_comments'),
+    path('comments/<str:pk>/', views.dashboard_comment_detail, name='dashboard_comment_detail'),
+    path('comments/<str:pk>/approve/', views.dashboard_comment_approve, name='dashboard_comment_approve'),
+    path('comments/<str:pk>/unapprove/', views.dashboard_comment_unapprove, name='dashboard_comment_unapprove'),
+    path('comments/delete/<str:pk>/', views.dashboard_comment_delete, name='dashboard_comment_delete'),
 ]

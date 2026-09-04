@@ -27,11 +27,9 @@ def home(request):
         status='Published'
     ).order_by('-views', '-created_at')[:4]
     
-    # fetch about us
-    try:
-        about = About.objects.get()
-    except:
-        about = None
+    # Use the most recently updated record if historical data contains more
+    # than the single About entry enforced by the management UI.
+    about = About.objects.order_by('-updated_at', '-created_at', '-pk').first()
 
     context = {
         'featured_post' : featured_post,

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Delete Social Link | GenVilla Dashboard{% endblock %}
+{% block content %}
+<div class="row">
+    {% include 'dashboard/sidebar.html' %}
+    <div class="col-md-9">
+        <h2>Delete Social Link</h2>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <p>Delete the <strong>{{ social_link.platform }}</strong> social link?</p>
+                <p class="text-muted">{{ social_link.link }}</p>
+                <form method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Social Link</button>
+                    <a href="{% url 'dashboard_social_links' %}" class="btn btn-light ml-2">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

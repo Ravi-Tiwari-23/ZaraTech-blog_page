@@ -4,12 +4,21 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+from assignments.models import About, SocialLink
 from blogs.models import Blog, Category, Comment
-from dashboards.forms import AddUserForm, BlogPostForm, CategoryForm, EditUserForm
+from dashboards.forms import (
+    AboutForm,
+    AddUserForm,
+    BlogPostForm,
+    CategoryForm,
+    EditUserForm,
+    SocialLinkForm,
+)
 
 
 def is_manager(user):
@@ -193,3 +202,137 @@ def delete_user(request, pk):
         deleted_user.delete()
         messages.success(request, 'User deleted successfully.')
     return redirect('users')
+
+
+@dashboard_user_required
+def dashboard_about(request):
+    about_records = About.objects.order_by('-updated_at', '-created_at', '-pk')
+    about = about_records.first()
+    form = AboutForm(request.POST or None, instance=about)
+
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'About section updated successfully.')
+        return redirect('dashboard_about')
+
+    return render(request, 'dashboard/about.html', {
+        'form': form,
+        'about': about,
+        'multiple_about_records': about_records.count() > 1,
+    })
+
+
+@dashboard_user_required
+def dashboard_social_links(request):
+    return render(request, 'dashboard/social_links.html', {
+        'social_links_list': SocialLink.objects.all().order_by('platform'),
+    })
+
+
+@dashboard_user_required
+def dashboard_add_social_link(request):
+    form = SocialLinkForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Social link added successfully.')
+        return redirect('dashboard_social_links')
+
+    return render(request, 'dashboard/social_link_form.html', {
+        'form': form,
+        'page_title': 'Add Social Link',
+        'submit_label': 'Add Social Link',
+    })
+
+
+@dashboard_user_required
+def dashboard_edit_social_link(request, pk):
+    social_link = get_object_or_404(SocialLink, pk=pk)
+    form = SocialLinkForm(request.POST or None, instance=social_link)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Social link updated successfully.')
+        return redirect('dashboard_social_links')
+
+    return render(request, 'dashboard/social_link_form.html', {
+        'form': form,
+        'page_title': 'Edit Social Link',
+        'submit_label': 'Save Changes',
+        'social_link': social_link,
+    })
+
+
+@dashboard_user_required
+def dashboard_delete_social_link(request, pk):
+    social_link = get_object_or_404(SocialLink, pk=pk)
+    if request.method == 'POST':
+        platform = social_link.platform
+        social_link.delete()
+        messages.success(request, f'{platform} social link deleted successfully.')
+        return redirect('dashboard_social_links')
+
+    return render(request, 'dashboard/social_link_delete.html', {
+        'social_link': social_link,
+    })
+
+
+@dashboard_user_required
+def dashboard_comments(request):
+    status_filter = request.GET.get('status', 'all')
+    comments = Comment.objects.all().order_by('-created_at')
+
+    if status_filter == 'approved':
+        comments = comments.filter(is_approved=True)
+    elif status_filter == 'unapproved':
+        comments = comments.filter(is_approved=False)
+    else:
+        status_filter = 'all'
+
+    paginator = Paginator(comments, 20)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'dashboard/comments.html', {
+        'page_obj': page_obj,
+        'status_filter': status_filter,
+    })
+
+
+@dashboard_user_required
+def dashboard_comment_detail(request, pk):
+    return render(request, 'dashboard/comment_detail.html', {
+        'comment': get_object_or_404(Comment, pk=pk),
+    })
+
+
+@dashboard_user_required
+@require_POST
+def dashboard_comment_approve(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+    if not comment.is_approved:
+        comment.is_approved = True
+        comment.save()
+    messages.success(request, 'Comment approved successfully.')
+    return redirect('dashboard_comments')
+
+
+@dashboard_user_required
+@require_POST
+def dashboard_comment_unapprove(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+    if comment.is_approved:
+        comment.is_approved = False
+        comment.save()
+    messages.success(request, 'Comment unapproved successfully.')
+    return redirect('dashboard_comments')
+
+
+@manager_required
+def dashboard_comment_delete(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+    if request.method == 'POST':
+        comment.delete()
+        messages.success(request, 'Comment deleted successfully.')
+        return redirect('dashboard_comments')
+
+    return render(request, 'dashboard/comment_delete.html', {
+        'comment': comment,
+    })

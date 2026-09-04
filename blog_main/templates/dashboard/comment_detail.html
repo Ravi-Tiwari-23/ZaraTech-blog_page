@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Comment by {{ comment.user.username }} | GenVilla Dashboard{% endblock %}
+{% block content %}
+<div class="row">
+    {% include 'dashboard/sidebar.html' %}
+    <div class="col-md-9">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="mb-0">Comment Details</h2>
+            <a href="{% url 'dashboard_comments' %}" class="btn btn-light">Back to Comments</a>
+        </div>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">Commenter</dt><dd class="col-sm-9">{{ comment.user.username }}</dd>
+                    <dt class="col-sm-3">Email</dt><dd class="col-sm-9">{{ comment.user.email|default:'—' }}</dd>
+                    <dt class="col-sm-3">Article</dt><dd class="col-sm-9"><a href="{% url 'blogs' comment.blog.slug %}">{{ comment.blog.title }}</a></dd>
+                    <dt class="col-sm-3">Status</dt><dd class="col-sm-9">{% if comment.is_approved %}<span class="badge badge-success">Approved</span>{% else %}<span class="badge badge-secondary">Unapproved</span>{% endif %}</dd>
+                    <dt class="col-sm-3">Created</dt><dd class="col-sm-9">{{ comment.created_at|date:'M d, Y, P' }}</dd>
+                    <dt class="col-sm-3">Updated</dt><dd class="col-sm-9">{{ comment.updated_at|date:'M d, Y, P' }}</dd>
+                    <dt class="col-sm-3">Comment</dt><dd class="col-sm-9"><div class="p-3 bg-light rounded">{{ comment.body|linebreaksbr }}</div></dd>
+                </dl>
+                <div class="mt-3">
+                    {% if comment.is_approved %}
+                    <form action="{% url 'dashboard_comment_unapprove' comment.pk %}" method="POST" class="d-inline">
+                        {% csrf_token %}<button type="submit" class="btn btn-secondary">Unapprove</button>
+                    </form>
+                    {% else %}
+                    <form action="{% url 'dashboard_comment_approve' comment.pk %}" method="POST" class="d-inline">
+                        {% csrf_token %}<button type="submit" class="btn btn-success">Approve</button>
+                    </form>
+                    {% endif %}
+                    {% if is_manager %}<a href="{% url 'dashboard_comment_delete' comment.pk %}" class="btn btn-danger ml-2">Delete</a>{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
