@@ -11,34 +11,81 @@ from django.contrib import messages
 from django.utils.http import url_has_allowed_host_and_scheme
 
 def home(request):
-    featured_post = list(Blog.objects.select_related('author', 'Category').filter(
-        is_featured=True, status='Published'
-    ).order_by('-updated_at')[:4])
+    # ---------------------------------------------------------
+    # FEATURED POSTS
+    # ---------------------------------------------------------
+
+    featured_post = list(
+        Blog.objects.filter(
+            is_featured=True,
+            status='Published'
+        ).order_by('-updated_at')[:4]
+    )
+
+    # If fewer than 4 posts are explicitly featured,
+    # fill the remaining hero slides with popular/recent posts.
     if len(featured_post) < 4:
         featured_ids = [post.pk for post in featured_post]
-        dynamic_featured = Blog.objects.select_related('author', 'Category').filter(
+
+        dynamic_featured = Blog.objects.filter(
             status='Published'
-        ).exclude(pk__in=featured_ids).order_by('-views', '-updated_at')[:4 - len(featured_post)]
+        ).exclude(
+            pk__in=featured_ids
+        ).order_by(
+            '-views',
+            '-updated_at'
+        )[:4 - len(featured_post)]
+
         featured_post.extend(dynamic_featured)
-    posts = Blog.objects.select_related('author', 'Category').filter(
-        is_featured=False, status='Published'
-    )
-    popular_posts = Blog.objects.select_related('author', 'Category').filter(
+
+
+    # ---------------------------------------------------------
+    # LATEST POSTS
+    # ---------------------------------------------------------
+
+    # Latest posts should include all published posts,
+    # whether or not they are also featured.
+    posts = Blog.objects.filter(
         status='Published'
-    ).order_by('-views', '-created_at')[:4]
-    
-    # Use the most recently updated record if historical data contains more
-    # than the single About entry enforced by the management UI.
-    about = About.objects.order_by('-updated_at', '-created_at', '-pk').first()
+    ).order_by(
+        '-created_at'
+    )[:6]
+
+
+    # ---------------------------------------------------------
+    # POPULAR POSTS
+    # ---------------------------------------------------------
+
+    popular_posts = Blog.objects.filter(
+        status='Published'
+    ).order_by(
+        '-views',
+        '-created_at'
+    )[:4]
+
+
+    # ---------------------------------------------------------
+    # ABOUT
+    # ---------------------------------------------------------
+
+    about = About.objects.order_by(
+        '-updated_at',
+        '-created_at'
+    ).first()
+
+
+    # ---------------------------------------------------------
+    # CONTEXT
+    # ---------------------------------------------------------
 
     context = {
-        'featured_post' : featured_post,
-        'posts':posts,
+        'featured_post': featured_post,
+        'posts': posts,
         'popular_posts': popular_posts,
         'about': about,
     }
 
-    return render(request, "home.html", context)
+    return render(request, 'home.html', context)
 
 def register(request):
     if request.method == 'POST':
