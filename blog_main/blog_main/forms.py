@@ -5,6 +5,12 @@ from django.contrib.auth.forms import UserCreationForm
 
 
 class RegistrationForm(UserCreationForm):
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'autocomplete': 'email',
+            'inputmode': 'email',
+        }),
+    )
     username = forms.CharField(
         max_length=20,
         help_text=(
