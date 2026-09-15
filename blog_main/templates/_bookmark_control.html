@@ -1,0 +1,13 @@
+{% if user.is_authenticated %}
+<form method="post" action="{% if post.pk in saved_blog_ids %}{% url 'unsave_blog' post.slug %}{% else %}{% url 'save_blog' post.slug %}{% endif %}" style="margin: 0;">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <button class="bookmark-button{% if extra_class %} {{ extra_class }}{% endif %}{% if post.pk in saved_blog_ids %} is-saved{% endif %}" type="submit" aria-label="{% if post.pk in saved_blog_ids %}Remove saved article{% else %}Save article{% endif %}" aria-pressed="{% if post.pk in saved_blog_ids %}true{% else %}false{% endif %}" title="{% if post.pk in saved_blog_ids %}Saved{% else %}Save for later{% endif %}">
+        <i class="fa {% if post.pk in saved_blog_ids %}fa-bookmark{% else %}fa-bookmark-o{% endif %}" aria-hidden="true"></i>
+    </button>
+</form>
+{% else %}
+<a class="bookmark-button{% if extra_class %} {{ extra_class }}{% endif %}" href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}" aria-label="Log in to save article" title="Log in to save for later">
+    <i class="fa fa-bookmark-o" aria-hidden="true"></i>
+</a>
+{% endif %}

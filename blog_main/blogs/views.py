@@ -1,9 +1,12 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db.models import F, Q
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_POST
 
-from blogs.models import Blog, Category
+from blogs.models import Blog, Category, SavedPost
 from .forms import CommentForm
 
 
@@ -14,7 +17,7 @@ def posts_by_category(request, category_id):
     posts = Blog.objects.filter(
         status = 'Published' , 
         Category = category_id
-    )
+    ).prefetch_related('author', 'Category')
     #USE TRY AND EXECPT WHEN YOU WANT TO DO SOME CUSTOM ACTION WHEN THE CATEGORY DOESNOT EXIST
     # try:
     #     category = Category.objects.get(pk=category_id)
@@ -30,12 +33,13 @@ def posts_by_category(request, category_id):
         'posts': posts,
         'category': category,
         'category_name': category.category_name,
+        'saved_blog_ids': _saved_blog_ids(request),
     }
     return render(request, 'posts_by_category.html', context)
 
 def blogs(request, slug):
     single_blog = get_object_or_404(
-        Blog,
+        Blog.objects.prefetch_related('author', 'Category'),
         slug=slug,
         status='Published'
     )
@@ -103,13 +107,16 @@ def blogs(request, slug):
         status='Published'
     ).exclude(
         pk=single_blog.pk
-    )[:3]
+    ).prefetch_related('author', 'Category')[:3]
 
     # Do not use select_related() here either.
     popular_posts = Blog.objects.filter(
         status='Published'
     ).exclude(
         pk=single_blog.pk
+    ).prefetch_related(
+        'author',
+        'Category',
     ).order_by(
         '-views',
         '-created_at'
@@ -123,12 +130,108 @@ def blogs(request, slug):
         'comment_form': comment_form,
         'related_posts': related_posts,
         'popular_posts': popular_posts,
+        'saved_blog_ids': _saved_blog_ids(request),
     }
 
     return render(
         request,
         'blogs.html',
         context
+    )
+
+
+def _saved_blog_ids(request):
+    if not request.user.is_authenticated:
+        return set()
+
+    return set(
+        SavedPost.objects.filter(
+            user=request.user,
+        ).values_list('blog_id', flat=True)
+    )
+
+
+def _bookmark_return_url(request, fallback):
+    next_url = request.POST.get('next', '')
+
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return next_url
+
+    return fallback
+
+
+@login_required(login_url='login')
+@require_POST
+def save_blog(request, slug):
+    blog = get_object_or_404(
+        Blog,
+        slug=slug,
+        status='Published',
+    )
+    SavedPost.objects.get_or_create(
+        user=request.user,
+        blog=blog,
+    )
+    messages.success(request, 'Article saved.')
+    return redirect(
+        _bookmark_return_url(
+            request,
+            reverse('blogs', args=[blog.slug]),
+        )
+    )
+
+
+@login_required(login_url='login')
+@require_POST
+def unsave_blog(request, slug):
+    blog = get_object_or_404(
+        Blog,
+        slug=slug,
+        status='Published',
+    )
+    SavedPost.objects.filter(
+        user=request.user,
+        blog=blog,
+    ).delete()
+    messages.success(request, 'Article removed from saved articles.')
+    return redirect(
+        _bookmark_return_url(
+            request,
+            reverse('blogs', args=[blog.slug]),
+        )
+    )
+
+
+@login_required(login_url='login')
+def saved_posts(request):
+    saved_items = list(
+        SavedPost.objects.filter(user=request.user)
+    )
+    blog_ids = [item.blog_id for item in saved_items]
+    blogs_by_id = {
+        blog.pk: blog
+        for blog in Blog.objects.filter(
+            pk__in=blog_ids,
+            status='Published',
+        ).prefetch_related('author', 'Category')
+    }
+    posts = [
+        blogs_by_id[item.blog_id]
+        for item in saved_items
+        if item.blog_id in blogs_by_id
+    ]
+
+    return render(
+        request,
+        'saved_posts.html',
+        {
+            'posts': posts,
+            'saved_blog_ids': set(blog_ids),
+        },
     )
 
 def search(request):

@@ -12,7 +12,7 @@ from accounts.utils import (
 )
 
 from assignments.models import About
-from blogs.models import Blog, Category
+from blogs.models import Blog, Category, SavedPost
 
 from .forms import RegistrationForm
 
@@ -26,6 +26,9 @@ def home(request):
         Blog.objects.filter(
             is_featured=True,
             status="Published",
+        ).prefetch_related(
+            "author",
+            "Category",
         ).order_by("-updated_at")[:4]
     )
 
@@ -44,6 +47,10 @@ def home(request):
             .order_by(
                 "-views",
                 "-updated_at",
+            )
+            .prefetch_related(
+                "author",
+                "Category",
             )[: 4 - len(featured_post)]
         )
 
@@ -55,6 +62,9 @@ def home(request):
 
     posts = Blog.objects.filter(
         status="Published",
+    ).prefetch_related(
+        "author",
+        "Category",
     ).order_by(
         "-created_at",
     )[:6]
@@ -65,6 +75,9 @@ def home(request):
 
     popular_posts = Blog.objects.filter(
         status="Published",
+    ).prefetch_related(
+        "author",
+        "Category",
     ).order_by(
         "-views",
         "-created_at",
@@ -88,6 +101,15 @@ def home(request):
         "posts": posts,
         "popular_posts": popular_posts,
         "about": about,
+        "saved_blog_ids": (
+            set(
+                SavedPost.objects.filter(
+                    user=request.user,
+                ).values_list("blog_id", flat=True)
+            )
+            if request.user.is_authenticated
+            else set()
+        ),
     }
 
     return render(

@@ -15,7 +15,7 @@
                 <a class="eyebrow eyebrow-light" href="{% url 'posts_by_category' post.Category.id %}">{{ post.Category.category_name }}</a>
                 <h1><a href="{% url 'blogs' post.slug %}">{{ post.title }}</a></h1>
                 <p>{{ post.short_description|truncatewords:24 }}</p>
-                <div class="story-meta story-meta-light"><span>By {{ post.author.get_full_name|default:post.author.username }}</span><span>{{ post.reading_time }} min read</span></div>
+                <div class="story-meta story-meta-light"><span>By {{ post.author.get_full_name|default:post.author.username }}</span><span>{{ post.created_at|date:'M d, Y' }}</span></div>
                 <a href="{% url 'blogs' post.slug %}" class="button button-light">Read the story <i class="fa fa-arrow-right"></i></a>
             </div>
         </article>
@@ -51,12 +51,12 @@
                 <span class="image-category">{{ post.Category.category_name }}</span>
             </a>
             <div class="story-card-body">
-                <div class="story-meta"><span>{{ post.created_at|date:'M d, Y' }}</span><span>{{ post.reading_time }} min read</span></div>
+                <div class="story-meta"><span>{{ post.created_at|date:'M d, Y' }}</span><span>{{ post.author.get_full_name|default:post.author.username }}</span></div>
                 <h3><a href="{% url 'blogs' post.slug %}">{{ post.title }}</a></h3>
                 <p>{{ post.short_description|truncatewords:18 }}</p>
                 <div class="card-actions">
                     <a class="story-link" href="{% url 'blogs' post.slug %}">Read article <i class="fa fa-long-arrow-right"></i></a>
-                    <button class="bookmark-button" data-bookmark="{{ post.slug }}" type="button" aria-label="Save article" title="Save for later"><i class="fa fa-bookmark-o"></i></button>
+                    {% include "_bookmark_control.html" with post=post %}
                 </div>
             </div>
         </article>
@@ -83,7 +83,7 @@
                 <div class="popular-card-body">
                     <a class="eyebrow eyebrow-light" href="{% url 'posts_by_category' post.Category.id %}">{{ post.Category.category_name }}</a>
                     <h3><a href="{% url 'blogs' post.slug %}">{{ post.title }}</a></h3>
-                    <div class="popular-meta"><span><i class="fa fa-eye"></i> {{ post.views }} views</span><span>{{ post.reading_time }} min read</span></div>
+                    <div class="popular-meta"><span><i class="fa fa-eye"></i> {{ post.views }} views</span><span>{{ post.author.get_full_name|default:post.author.username }}</span></div>
                 </div>
             </article>
             {% endfor %}
@@ -107,9 +107,9 @@
                         <a class="eyebrow" href="{% url 'posts_by_category' post.Category.id %}">{{ post.Category.category_name }}</a>
                         <h3><a href="{% url 'blogs' post.slug %}">{{ post.title }}</a></h3>
                         <p>{{ post.short_description|truncatewords:22 }}</p>
-                        <div class="story-meta"><span>{{ post.created_at|timesince }} ago</span><span><i class="fa fa-eye"></i> {{ post.views }}</span><span>{{ post.reading_time }} min read</span></div>
+                        <div class="story-meta"><span>{{ post.created_at|timesince }} ago</span><span><i class="fa fa-eye"></i> {{ post.views }}</span><span>{{ post.author.get_full_name|default:post.author.username }}</span></div>
                     </div>
-                    <button class="bookmark-button feed-bookmark" data-bookmark="{{ post.slug }}" type="button" aria-label="Save article" title="Save for later"><i class="fa fa-bookmark-o"></i></button>
+                    {% include "_bookmark_control.html" with post=post extra_class="feed-bookmark" %}
                 </article>
                 {% empty %}
                 <div class="empty-state" data-reveal><i class="fa fa-newspaper-o"></i><h3>Stories are on the way</h3><p>Check back soon for fresh property insights.</p></div>

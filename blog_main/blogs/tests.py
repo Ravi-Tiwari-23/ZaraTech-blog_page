@@ -4,13 +4,18 @@ from django.urls import reverse
 from django.template.loader import render_to_string
 from django.test import RequestFactory
 
-from .models import Blog, Category, Comment
+from .models import Blog, Category, Comment, SavedPost
 
 
 class BlogFeatureTests(TestCase):
     def setUp(self):
         self.category = Category.objects.create(category_name='Django')
-        self.author = User.objects.create_user('author', password='test-pass-123')
+        self.author = User.objects.create_user(
+            'author',
+            password='test-pass-123',
+            first_name='Ravi',
+            last_name='Tiwari',
+        )
         self.post = Blog.objects.create(
             title='A useful Django post',
             Category=self.category,
@@ -42,6 +47,94 @@ class BlogFeatureTests(TestCase):
         self.client.get(url)
         self.post.refresh_from_db()
         self.assertEqual(self.post.views, 1)
+
+    def test_blog_cards_show_author_name_instead_of_reading_time(self):
+        response = self.client.get(
+            reverse('posts_by_category', args=[self.category.pk])
+        )
+
+        self.assertContains(response, 'Ravi Tiwari')
+        self.assertNotContains(response, '1 min read')
+
+    def test_save_persists_across_refresh_and_duplicate_post_is_idempotent(self):
+        self.client.login(username='author', password='test-pass-123')
+        save_url = reverse('save_blog', args=[self.post.slug])
+
+        self.client.post(save_url)
+        self.client.post(save_url)
+
+        self.assertEqual(
+            SavedPost.objects.filter(
+                user=self.author,
+                blog=self.post,
+            ).count(),
+            1,
+        )
+        refreshed = self.client.get(
+            reverse('posts_by_category', args=[self.category.pk])
+        )
+        self.assertContains(refreshed, 'aria-label="Remove saved article"')
+        self.assertContains(refreshed, 'fa-bookmark')
+
+    def test_user_can_unsave_article(self):
+        SavedPost.objects.create(user=self.author, blog=self.post)
+        self.client.login(username='author', password='test-pass-123')
+
+        response = self.client.post(
+            reverse('unsave_blog', args=[self.post.slug])
+        )
+
+        self.assertRedirects(
+            response,
+            reverse('blogs', args=[self.post.slug]),
+            fetch_redirect_response=False,
+        )
+        self.assertFalse(
+            SavedPost.objects.filter(
+                user=self.author,
+                blog=self.post,
+            ).exists()
+        )
+
+    def test_saved_articles_are_private_to_each_user(self):
+        SavedPost.objects.create(user=self.author, blog=self.post)
+        second_user = User.objects.create_user(
+            'second-reader',
+            password='test-pass-123',
+        )
+
+        self.client.login(username='second-reader', password='test-pass-123')
+        response = self.client.get(reverse('saved_posts'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, self.post.title)
+        self.assertEqual(
+            SavedPost.objects.filter(user=second_user).count(),
+            0,
+        )
+
+        self.client.logout()
+        self.client.login(username='author', password='test-pass-123')
+        response = self.client.get(reverse('saved_posts'))
+        self.assertContains(response, self.post.title)
+
+    def test_anonymous_save_and_saved_page_redirect_to_login(self):
+        save_url = reverse('save_blog', args=[self.post.slug])
+        saved_url = reverse('saved_posts')
+
+        save_response = self.client.post(save_url)
+        saved_response = self.client.get(saved_url)
+
+        self.assertRedirects(
+            save_response,
+            f'{reverse("login")}?next={save_url}',
+            fetch_redirect_response=False,
+        )
+        self.assertRedirects(
+            saved_response,
+            f'{reverse("login")}?next={saved_url}',
+            fetch_redirect_response=False,
+        )
 
     def test_only_authenticated_users_can_comment(self):
         url = reverse('blogs', args=[self.post.slug])

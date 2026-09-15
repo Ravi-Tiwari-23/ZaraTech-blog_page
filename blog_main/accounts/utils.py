@@ -1,9 +1,9 @@
 import math
 import secrets
+import resend
 
 from django.conf import settings
 from django.contrib.auth.hashers import make_password, check_password
-from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils import timezone
 
@@ -219,50 +219,32 @@ def clear_otp_session(request, purpose):
 
 def send_otp_email(email, otp, purpose):
     """
-    Send a GenVilla OTP email using Django's configured
-    Resend SMTP connection.
+    Send OTP email using Resend HTTPS API.
     """
 
     if purpose == "email_verification":
-
-        subject = (
-            f"{otp} is your GenVilla verification code"
-        )
-
+        subject = f"{otp} is your GenVilla verification code"
         heading = "Verify your email"
-
         intro = (
             "Use the verification code below to "
             "verify your GenVilla account."
         )
 
     elif purpose == "password_reset":
-
-        subject = (
-            f"{otp} is your GenVilla password reset code"
-        )
-
+        subject = f"{otp} is your GenVilla password reset code"
         heading = "Reset your password"
-
         intro = (
             "Use the verification code below to "
             "continue resetting your GenVilla password."
         )
 
     else:
-
-        subject = (
-            f"{otp} is your GenVilla verification code"
-        )
-
+        subject = f"{otp} is your GenVilla verification code"
         heading = "Verification code"
-
         intro = (
-            "Use the verification code below "
-            "to continue."
+            "Use the verification code below to continue."
         )
 
-    # Variables available inside otp_email.html
     context = {
         "otp": otp,
         "heading": heading,
@@ -270,37 +252,20 @@ def send_otp_email(email, otp, purpose):
         "expiry_minutes": 5,
     }
 
-    # HTML version
     html_body = render_to_string(
         "accounts/emails/otp_email.html",
         context,
     )
 
-    # Plain-text fallback
-    text_body = (
-        f"{heading}\n\n"
-        f"{intro}\n\n"
-        f"Your verification code is:\n\n"
-        f"{otp}\n\n"
-        f"This code expires in 5 minutes.\n\n"
-        "If you did not request this code, "
-        "you can safely ignore this email.\n\n"
-        "GenVilla\n"
-        "https://blog.genvilla.in"
+    resend.api_key = settings.RESEND_API_KEY
+
+    response = resend.Emails.send(
+        {
+            "from": "GenVilla <noreply@mail.genvilla.in>",
+            "to": [email],
+            "subject": subject,
+            "html": html_body,
+        }
     )
 
-    message = EmailMultiAlternatives(
-        subject=subject,
-        body=text_body,
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        to=[email],
-    )
-
-    message.attach_alternative(
-        html_body,
-        "text/html",
-    )
-
-    return message.send(
-        fail_silently=False
-    )
+    return response

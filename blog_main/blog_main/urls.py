@@ -36,7 +36,10 @@ urlpatterns = [
     path('category/', include('blogs.urls')),
     path('blogs/search/', BlogsView.search, name = 'search'),
     #search endpoint
+    path('blogs/<slug:slug>/save/', BlogsView.save_blog, name='save_blog'),
+    path('blogs/<slug:slug>/unsave/', BlogsView.unsave_blog, name='unsave_blog'),
     path('blogs/<slug:slug>/',BlogsView.blogs, name='blogs'),
+    path('saved/', BlogsView.saved_posts, name='saved_posts'),
     path('register/', views.register , name= 'register'),
     path('login/', views.login, name = 'login'),
     path('logout/', views.logout, name='logout'),

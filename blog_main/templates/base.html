@@ -83,6 +83,7 @@
                     <a class="button button-primary button-small" href="{% url 'register' %}">Join free</a>
                     {% else %}
                         {% if has_dashboard_access %}<a class="text-action" href="{% url 'dashboard' %}">Dashboard</a>{% endif %}
+                        <a class="text-action" href="{% url 'saved_posts' %}">Saved</a>
                         <a class="button button-outline button-small" href="{% url 'logout' %}">Log out</a>
                     {% endif %}
                 </div>
@@ -110,6 +111,7 @@
                 <a class="button button-primary button-small" href="{% url 'register' %}">Join free</a>
                 {% else %}
                     {% if has_dashboard_access %}<a class="button button-outline button-small" href="{% url 'dashboard' %}">Dashboard</a>{% endif %}
+                    <a class="button button-outline button-small" href="{% url 'saved_posts' %}">Saved articles</a>
                     <a class="button button-primary button-small" href="{% url 'logout' %}">Log out</a>
                 {% endif %}
             </div>
@@ -240,17 +242,6 @@
             }
             window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
             if (topButton) topButton.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
-
-            document.querySelectorAll('[data-bookmark]').forEach(function (button) {
-                var key = 'genvilla-bookmark-' + button.getAttribute('data-bookmark');
-                if (localStorage.getItem(key)) button.classList.add('is-saved');
-                button.addEventListener('click', function () {
-                    var saved = button.classList.toggle('is-saved');
-                    if (saved) localStorage.setItem(key, '1'); else localStorage.removeItem(key);
-                    button.setAttribute('aria-label', saved ? 'Remove saved article' : 'Save article');
-                    button.setAttribute('title', saved ? 'Saved' : 'Save for later');
-                });
-            });
 
             document.querySelectorAll('[data-share]').forEach(function (button) {
                 button.addEventListener('click', function () {

@@ -55,7 +55,7 @@
         <aside class="article-tools" aria-label="Article actions">
             <span>Share</span>
             <button type="button" data-share data-share-title="{{ single_blog.title|escape }}" aria-label="Share this article"><i class="fa fa-share-alt" aria-hidden="true"></i></button>
-            <button type="button" data-bookmark="{{ single_blog.slug }}" class="bookmark-button" aria-label="Save article" title="Save for later"><i class="fa fa-bookmark-o" aria-hidden="true"></i></button>
+            {% include "_bookmark_control.html" with post=single_blog %}
         </aside>
 
         <div class="article-column">
@@ -90,7 +90,7 @@
                 {% for post in related_posts %}
                 <a href="{% url 'blogs' post.slug %}" class="related-story">
                     {% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.title }}" loading="lazy" decoding="async">{% endif %}
-                    <span><strong>{{ post.title }}</strong><small>{{ post.reading_time }} min read</small></span>
+                    <span><strong>{{ post.title }}</strong><small>{{ post.author.get_full_name|default:post.author.username }}</small></span>
                 </a>
                 {% endfor %}
             </div>
@@ -102,7 +102,7 @@
                 <a href="{% url 'blogs' post.slug %}" class="article-popular-story">
                     <span class="article-popular-rank">0{{ forloop.counter }}</span>
                     <span class="article-popular-image">{% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.title }}" loading="lazy" decoding="async">{% endif %}</span>
-                    <span class="article-popular-copy"><strong>{{ post.title }}</strong><small><i class="fa fa-eye"></i> {{ post.views }} · {{ post.reading_time }} min</small></span>
+                    <span class="article-popular-copy"><strong>{{ post.title }}</strong><small><i class="fa fa-eye"></i> {{ post.views }} · {{ post.author.get_full_name|default:post.author.username }}</small></span>
                 </a>
                 {% endfor %}
             </div>

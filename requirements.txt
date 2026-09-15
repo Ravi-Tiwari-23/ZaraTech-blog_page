@@ -18,3 +18,5 @@ Pillow==11.3.0
 
 cloudinary
 django-cloudinary-storage
+
+resend = 2.45.0

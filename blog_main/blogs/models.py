@@ -71,6 +71,32 @@ class Blog(models.Model):
         return self.title
 
 
+class SavedPost(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="saved_posts",
+    )
+    blog = models.ForeignKey(
+        Blog,
+        on_delete=models.CASCADE,
+        related_name="saved_by",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=("user", "blog"),
+                name="unique_user_blog_save",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username}: {self.blog.title}"
+
+
 class Comment(models.Model):
     blog = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_comments')
