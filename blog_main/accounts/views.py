@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.models import User
@@ -155,6 +157,9 @@ PASSWORD_RESET_GENERIC_MESSAGE = (
 )
 
 
+logger = logging.getLogger(__name__)
+
+
 def _active_user_for_email(email):
     return User.objects.filter(
         email__iexact=email,
@@ -186,25 +191,37 @@ def forgot_password(request):
             email = form.cleaned_data["email"].strip().lower()
             _clear_password_reset_authorization(request)
 
+            clear_otp_session(request, PASSWORD_RESET_PURPOSE)
+            user = _active_user_for_email(email)
+
+            if not user:
+                messages.success(
+                    request,
+                    PASSWORD_RESET_GENERIC_MESSAGE,
+                )
+                return redirect("forgot_password")
+
             otp = create_otp_session(
                 request,
                 PASSWORD_RESET_PURPOSE,
                 email,
             )
 
-            user = _active_user_for_email(email)
-
-            if user:
-                try:
-                    send_otp_email(
-                        email,
-                        otp,
-                        PASSWORD_RESET_PURPOSE,
-                    )
-                except Exception:
-                    # Keep the response generic to avoid revealing
-                    # whether the submitted email belongs to a user.
-                    pass
+            try:
+                send_otp_email(
+                    email,
+                    otp,
+                    PASSWORD_RESET_PURPOSE,
+                )
+            except Exception:
+                logger.exception("Failed to send password reset OTP")
+                clear_otp_session(request, PASSWORD_RESET_PURPOSE)
+                messages.error(
+                    request,
+                    "We could not send the verification code right now. "
+                    "Please try again in a moment.",
+                )
+                return redirect("forgot_password")
 
             messages.success(
                 request,
@@ -300,25 +317,37 @@ def resend_password_reset_otp(request):
         )
         return redirect("verify_reset_otp")
 
+    user = _active_user_for_email(email)
+
+    if not user:
+        clear_otp_session(request, PASSWORD_RESET_PURPOSE)
+        messages.success(
+            request,
+            PASSWORD_RESET_GENERIC_MESSAGE,
+        )
+        return redirect("forgot_password")
+
     otp = create_otp_session(
         request,
         PASSWORD_RESET_PURPOSE,
         email,
     )
 
-    user = _active_user_for_email(email)
-
-    if user:
-        try:
-            send_otp_email(
-                email,
-                otp,
-                PASSWORD_RESET_PURPOSE,
-            )
-        except Exception:
-            # Preserve an indistinguishable response for known and
-            # unknown email addresses.
-            pass
+    try:
+        send_otp_email(
+            email,
+            otp,
+            PASSWORD_RESET_PURPOSE,
+        )
+    except Exception:
+        logger.exception("Failed to send password reset OTP")
+        clear_otp_session(request, PASSWORD_RESET_PURPOSE)
+        messages.error(
+            request,
+            "We could not send the verification code right now. "
+            "Please try again in a moment.",
+        )
+        return redirect("forgot_password")
 
     messages.success(
         request,

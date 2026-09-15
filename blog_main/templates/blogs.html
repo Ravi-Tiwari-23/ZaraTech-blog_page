@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static blog_content %}
 {% block title %}{{ single_blog.title }} | GenVilla Insights{% endblock %}
 {% block meta_description %}{{ single_blog.short_description|truncatechars:160 }}{% endblock %}
 {% block social_title %}{{ single_blog.title }} | GenVilla Insights{% endblock %}
@@ -59,7 +59,7 @@
         </aside>
 
         <div class="article-column">
-            <div class="article-body" data-reveal>{{ single_blog.blog_body|linebreaks }}</div>
+            <div class="article-body" data-reveal>{{ single_blog.blog_body|render_blog_content }}</div>
             <div class="article-end" data-reveal><span></span><i class="fa fa-building"></i><span></span></div>
             <section class="author-card" data-reveal>
                 <div class="author-avatar author-avatar-large">{{ single_blog.author.username|first|upper }}</div>

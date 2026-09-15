@@ -23,6 +23,14 @@ class BlogPostForm(forms.ModelForm):
             'status',
             'is_featured',
         )
+        widgets = {
+            'blog_body': forms.Textarea(attrs={
+                'rows': 18,
+                'maxlength': '10000',
+                'class': 'rich-text-source',
+                'aria-describedby': 'blog-editor-help',
+            }),
+        }
 
 
 class AboutForm(forms.ModelForm):

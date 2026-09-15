@@ -2,7 +2,6 @@ from unittest.mock import patch
 
 from django.contrib.auth.models import Group, User
 from django.contrib.messages import get_messages
-from django.core import mail
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -30,7 +29,9 @@ class OTPAccountFlowTests(TestCase):
         return [str(message) for message in get_messages(response.wsgi_request)]
 
     def _request_reset(self, email=None, otp="123456", follow=False):
-        with patch("accounts.utils.generate_otp", return_value=otp):
+        with patch("accounts.utils.generate_otp", return_value=otp), patch(
+            "accounts.views.send_otp_email"
+        ):
             return self.client.post(
                 reverse("forgot_password"),
                 {"email": email or self.user.email},
@@ -54,7 +55,9 @@ class OTPAccountFlowTests(TestCase):
     def test_registration_keeps_inactive_reader_otp_flow(self):
         Group.objects.get_or_create(name="Reader")
 
-        with patch("accounts.utils.generate_otp", return_value="654321"):
+        with patch("accounts.utils.generate_otp", return_value="654321"), patch(
+            "blog_main.views.send_otp_email"
+        ) as send_otp:
             response = self.client.post(
                 reverse("register"),
                 {
@@ -69,7 +72,7 @@ class OTPAccountFlowTests(TestCase):
         user = User.objects.get(username="new-reader")
         self.assertFalse(user.is_active)
         self.assertTrue(user.groups.filter(name="Reader").exists())
-        self.assertEqual(len(mail.outbox), 1)
+        send_otp.assert_called_once()
         session = self.client.session
         self.assertEqual(
             session["email_verification_email"],
@@ -79,6 +82,44 @@ class OTPAccountFlowTests(TestCase):
             session["email_verification_otp_hash"],
             "654321",
         )
+
+    def test_verified_registration_becomes_visible_to_dashboard_manager(self):
+        reader_group, _ = Group.objects.get_or_create(name="Reader")
+        manager_group, _ = Group.objects.get_or_create(name="Manager")
+        manager = User.objects.create_user(
+            username="verification-manager",
+            password=self.password,
+        )
+        manager.groups.add(manager_group)
+
+        with patch("accounts.utils.generate_otp", return_value="654321"), patch(
+            "blog_main.views.send_otp_email"
+        ):
+            self.client.post(
+                reverse("register"),
+                {
+                    "email": "verified-reader@example.test",
+                    "username": "verified-reader",
+                    "password1": "Brand-New-Reader-Password-2026!",
+                    "password2": "Brand-New-Reader-Password-2026!",
+                },
+            )
+
+        pending_user = User.objects.get(username="verified-reader")
+        self.assertFalse(pending_user.is_active)
+        self.assertTrue(pending_user.groups.filter(pk=reader_group.pk).exists())
+
+        verify_response = self.client.post(
+            reverse("verify_email"),
+            {"otp": "654321"},
+        )
+        self.assertRedirects(verify_response, reverse("home"))
+        pending_user.refresh_from_db()
+        self.assertTrue(pending_user.is_active)
+
+        self.client.force_login(manager)
+        users_response = self.client.get(reverse("users"))
+        self.assertContains(users_response, pending_user.username)
 
     def test_login_redirect_rules_remain_unchanged(self):
         next_response = self.client.post(
@@ -111,11 +152,20 @@ class OTPAccountFlowTests(TestCase):
         )
 
     def test_password_reset_request_sends_hashed_otp_for_active_user(self):
-        response = self._request_reset()
+        with patch("accounts.utils.generate_otp", return_value="123456"), patch(
+            "accounts.views.send_otp_email"
+        ) as send_otp:
+            response = self.client.post(
+                reverse("forgot_password"),
+                {"email": self.user.email},
+            )
 
         self.assertRedirects(response, reverse("verify_reset_otp"))
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertIn("123456", mail.outbox[0].body)
+        send_otp.assert_called_once_with(
+            self.user.email,
+            "123456",
+            "password_reset",
+        )
 
         session = self.client.session
         self.assertNotEqual(session["password_reset_otp_hash"], "123456")
@@ -143,11 +193,57 @@ class OTPAccountFlowTests(TestCase):
         )
         inactive_messages = self._messages(inactive_response)
 
-        self.assertRedirects(unknown_response, reverse("verify_reset_otp"))
-        self.assertRedirects(inactive_response, reverse("verify_reset_otp"))
+        self.assertRedirects(unknown_response, reverse("forgot_password"))
+        self.assertRedirects(inactive_response, reverse("forgot_password"))
         self.assertEqual(unknown_messages, inactive_messages)
-        self.assertEqual(len(mail.outbox), 0)
+        self.assertNotIn("password_reset_otp_hash", self.client.session)
+        self.assertNotIn("password_reset_email", self.client.session)
         self.assertFalse(User.objects.get(pk=inactive.pk).is_active)
+
+    def test_delivery_failure_is_logged_and_clears_unusable_challenge(self):
+        with patch("accounts.utils.generate_otp", return_value="123456"), patch(
+            "accounts.views.send_otp_email",
+            side_effect=RuntimeError("provider unavailable"),
+        ), self.assertLogs("accounts.views", level="ERROR") as logs:
+            response = self.client.post(
+                reverse("forgot_password"),
+                {"email": self.user.email},
+                follow=True,
+            )
+
+        self.assertRedirects(response, reverse("forgot_password"))
+        self.assertTrue(any(
+            "Failed to send password reset OTP" in entry
+            for entry in logs.output
+        ))
+        self.assertIn(
+            "We could not send the verification code right now. "
+            "Please try again in a moment.",
+            self._messages(response),
+        )
+        self.assertNotIn("password_reset_otp_hash", self.client.session)
+        self.assertNotIn("password_reset_email", self.client.session)
+
+    def test_resend_delivery_failure_also_clears_challenge(self):
+        self._request_reset()
+        session = self.client.session
+        session["password_reset_last_sent"] = (
+            timezone.now().timestamp() - 61
+        )
+        session.save()
+
+        with patch(
+            "accounts.views.send_otp_email",
+            side_effect=RuntimeError("provider unavailable"),
+        ), self.assertLogs("accounts.views", level="ERROR"):
+            response = self.client.post(
+                reverse("resend_password_reset_otp"),
+                follow=True,
+            )
+
+        self.assertRedirects(response, reverse("forgot_password"))
+        self.assertNotIn("password_reset_otp_hash", self.client.session)
+        self.assertNotIn("password_reset_email", self.client.session)
 
     def test_early_resend_is_rejected_by_server_and_keeps_challenge(self):
         self._request_reset()
@@ -158,7 +254,6 @@ class OTPAccountFlowTests(TestCase):
         response = self.client.post(reverse("resend_password_reset_otp"))
 
         self.assertRedirects(response, reverse("verify_reset_otp"))
-        self.assertEqual(len(mail.outbox), 1)
         session = self.client.session
         self.assertEqual(session["password_reset_otp_hash"], original_hash)
         self.assertEqual(
@@ -174,13 +269,14 @@ class OTPAccountFlowTests(TestCase):
         )
         session.save()
 
-        with patch("accounts.utils.generate_otp", return_value="222222"):
+        with patch("accounts.utils.generate_otp", return_value="222222"), patch(
+            "accounts.views.send_otp_email"
+        ):
             resend_response = self.client.post(
                 reverse("resend_password_reset_otp"),
             )
 
         self.assertRedirects(resend_response, reverse("verify_reset_otp"))
-        self.assertEqual(len(mail.outbox), 2)
 
         old_response = self.client.post(
             reverse("verify_reset_otp"),

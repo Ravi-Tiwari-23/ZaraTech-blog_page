@@ -68,7 +68,7 @@ def dashboards(request):
         'draft_count': visible_posts.filter(status='Draft').count(),
         'total_views': visible_posts.aggregate(total=Sum('views'))['total'] or 0,
         'comment_count': Comment.objects.filter(blog__in=visible_posts).count(),
-        'user_count': User.objects.count() if is_manager(request.user) else None,
+        'user_count': User.objects.filter(is_active=True).count() if is_manager(request.user) else None,
         'recent_posts': visible_posts[:5],
     }
     return render(request, 'dashboard/dashboard.html', context)
@@ -155,7 +155,7 @@ def delete_post(request, pk):
 
 @manager_required
 def users(request):
-    users_list = User.objects.all().order_by('username')
+    users_list = User.objects.filter(is_active=True).order_by('username')
 
     return render(
         request,

@@ -1,0 +1,66 @@
+<div class="blog-editor-toolbar" data-blog-editor-toolbar role="toolbar" aria-label="Blog body formatting">
+    <button type="button" data-editor-action="bold" title="Bold"><strong>B</strong></button>
+    <button type="button" data-editor-action="italic" title="Italic"><em>I</em></button>
+    <button type="button" data-editor-action="heading" title="Heading">H2</button>
+    <button type="button" data-editor-action="paragraph" title="Paragraph">P</button>
+    <button type="button" data-editor-action="unordered-list" title="Bulleted list" aria-label="Bulleted list">&#8226; List</button>
+    <button type="button" data-editor-action="ordered-list" title="Numbered list" aria-label="Numbered list">1. List</button>
+    <button type="button" data-editor-action="link" title="Link"><i class="fa fa-link" aria-hidden="true"></i> Link</button>
+    <button type="button" data-editor-action="quote" title="Block quote">Quote</button>
+</div>
+<p id="blog-editor-help" class="text-muted small">Select text and use the formatting controls. Formatting is stored safely and previewed on the published article.</p>
+
+<style>
+    .blog-editor-toolbar { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .5rem; }
+    .blog-editor-toolbar button { background: var(--surface, #fff); border: 1px solid var(--border, #ced4da); border-radius: .3rem; color: inherit; min-height: 2.25rem; padding: .3rem .65rem; }
+    .blog-editor-toolbar button:hover, .blog-editor-toolbar button:focus { border-color: #d39e00; outline: 2px solid transparent; }
+    textarea.rich-text-source { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; min-height: 24rem; }
+</style>
+
+<script>
+(function () {
+    const textarea = document.getElementById('id_blog_body');
+    const toolbar = document.querySelector('[data-blog-editor-toolbar]');
+    if (!textarea || !toolbar) return;
+
+    textarea.parentNode.insertBefore(toolbar, textarea);
+
+    function replaceSelection(replacement, selectionStart, selectionEnd) {
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        textarea.setRangeText(replacement, start, end, 'end');
+        textarea.focus();
+        textarea.setSelectionRange(start + selectionStart, start + selectionEnd);
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    function wrap(prefix, suffix, placeholder) {
+        const selected = textarea.value.slice(textarea.selectionStart, textarea.selectionEnd);
+        const content = selected || placeholder;
+        replaceSelection(prefix + content + suffix, prefix.length, prefix.length + content.length);
+    }
+
+    function prefixLines(action) {
+        const selected = textarea.value.slice(textarea.selectionStart, textarea.selectionEnd) || 'List item';
+        const lines = selected.split(/\r?\n/);
+        const replacement = lines.map(function (line, index) {
+            return action === 'ordered-list' ? (index + 1) + '. ' + line : '- ' + line;
+        }).join('\n');
+        replaceSelection(replacement, 0, replacement.length);
+    }
+
+    toolbar.addEventListener('click', function (event) {
+        const button = event.target.closest('[data-editor-action]');
+        if (!button) return;
+        const action = button.dataset.editorAction;
+
+        if (action === 'bold') wrap('**', '**', 'bold text');
+        if (action === 'italic') wrap('*', '*', 'italic text');
+        if (action === 'heading') wrap('## ', '', 'Heading');
+        if (action === 'paragraph') wrap('\n\n', '\n\n', 'Paragraph text');
+        if (action === 'unordered-list' || action === 'ordered-list') prefixLines(action);
+        if (action === 'link') wrap('[', '](https://example.com)', 'link text');
+        if (action === 'quote') wrap('> ', '', 'Quote');
+    });
+}());
+</script>

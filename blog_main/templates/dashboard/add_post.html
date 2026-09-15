@@ -16,6 +16,7 @@
         <form action="{% url 'add_post' %}" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form | crispy }}
+            {% include 'dashboard/_blog_editor.html' %}
             <button type="submit" class="btn btn-warning">Submit</button>
         </form>
         <br>

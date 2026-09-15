@@ -116,6 +116,24 @@ class DashboardPermissionTests(DashboardManagementTestCase):
         self.assertContains(response, reverse('dashboard_social_links'))
         self.assertContains(response, reverse('dashboard_comments'))
 
+    def test_unverified_users_are_excluded_from_manager_list_and_count(self):
+        inactive = User.objects.create_user(
+            'pending-verification',
+            email='pending@example.test',
+            password=self.password,
+            is_active=False,
+        )
+        self.login(self.manager)
+
+        users_response = self.client.get(reverse('users'))
+        dashboard_response = self.client.get(reverse('dashboard'))
+
+        self.assertNotContains(users_response, inactive.username)
+        self.assertEqual(
+            dashboard_response.context['user_count'],
+            User.objects.filter(is_active=True).count(),
+        )
+
 
 class AboutManagementTests(DashboardManagementTestCase):
     def test_existing_about_record_is_updated_without_creating_a_duplicate(self):

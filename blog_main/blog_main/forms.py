@@ -15,6 +15,7 @@ class RegistrationForm(UserCreationForm):
             'autocomplete': 'username',
             'autocapitalize': 'none',
             'spellcheck': 'false',
+            'maxlength': '20',
         }),
     )
 

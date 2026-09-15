@@ -34,7 +34,7 @@ class Blog(models.Model):
 
     short_description = models.TextField(max_length=500)
 
-    blog_body = models.TextField(max_length= 2000)
+    blog_body = models.TextField(max_length=10000)
 
     status = models.CharField(max_length=20, choices = STATUS_CHOICES, default="Draft")
 

@@ -1,9 +1,11 @@
 from django.contrib.auth.models import Group, User
+from django.core.exceptions import ValidationError
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.template.loader import render_to_string
 from django.test import RequestFactory
 
+from dashboards.forms import BlogPostForm
 from .models import Blog, Category, Comment, SavedPost
 
 
@@ -154,6 +156,37 @@ class BlogFeatureTests(TestCase):
         self.assertContains(response, 'application/ld+json')
         self.assertContains(response, 'article:published_time')
 
+    def test_article_renders_supported_formatting_and_escapes_unsafe_html(self):
+        self.post.blog_body = (
+            '## Useful heading\n\n**Bold** and *italic*.\n\n'
+            '- First item\n- Second item\n\n1. Step one\n2. Step two\n\n'
+            '[Safe link](https://example.com)\n\n'
+            '<script>alert("unsafe")</script>\n\n'
+            '[Bad link](javascript:alert(1))'
+        )
+        self.post.save(update_fields=['blog_body'])
+
+        response = self.client.get(reverse('blogs', args=[self.post.slug]))
+
+        self.assertContains(response, '<h2>Useful heading</h2>', html=False)
+        self.assertContains(response, '<strong>Bold</strong>', html=False)
+        self.assertContains(response, '<em>italic</em>', html=False)
+        self.assertContains(response, '<ul><li>First item</li><li>Second item</li></ul>', html=False)
+        self.assertContains(response, '<ol><li>Step one</li><li>Step two</li></ol>', html=False)
+        self.assertContains(response, 'href="https://example.com"', html=False)
+        self.assertContains(response, '&lt;script&gt;', html=False)
+        self.assertNotContains(response, '<script>alert', html=False)
+        self.assertNotContains(response, 'href="javascript:', html=False)
+
+    def test_blog_body_form_accepts_long_articles_up_to_ten_thousand(self):
+        field = BlogPostForm().fields['blog_body']
+
+        self.assertEqual(Blog._meta.get_field('blog_body').max_length, 10000)
+        self.assertEqual(field.max_length, 10000)
+        self.assertEqual(len(field.clean('x' * 6000)), 6000)
+        with self.assertRaisesMessage(ValidationError, 'at most 10000 characters'):
+            field.clean('x' * 10001)
+
     def test_sitemap_only_includes_published_articles(self):
         draft = Blog.objects.create(
             title='Private draft',
@@ -234,3 +267,46 @@ class DashboardPermissionTests(TestCase):
             self.client.get(reverse('edit_post', args=[self.other_post.pk])).status_code,
             200,
         )
+
+    def test_add_and_edit_pages_include_editor_and_existing_content(self):
+        self.client.login(username='other', password='test-pass-123')
+
+        add_response = self.client.get(reverse('add_post'))
+        edit_response = self.client.get(
+            reverse('edit_post', args=[self.other_post.pk])
+        )
+
+        self.assertContains(add_response, 'data-blog-editor-toolbar')
+        self.assertContains(edit_response, 'data-blog-editor-toolbar')
+        self.assertContains(edit_response, self.other_post.blog_body)
+
+    def test_long_formatted_article_saves_and_reloads_through_edit_view(self):
+        self.client.login(username='other', password='test-pass-123')
+        self.other_post.featured_image = 'uploads/existing.jpg'
+        self.other_post.save(update_fields=['featured_image'])
+        formatted_prefix = (
+            '## Heading\n\n**Bold** and *italic*.\n\n'
+            '- Bullet\n\n1. Numbered\n\n'
+            '[Link](https://example.com)\n\n'
+        )
+        body = formatted_prefix + ('x' * (6000 - len(formatted_prefix)))
+
+        response = self.client.post(
+            reverse('edit_post', args=[self.other_post.pk]),
+            {
+                'title': self.other_post.title,
+                'Category': self.category.pk,
+                'short_description': self.other_post.short_description,
+                'blog_body': body,
+                'status': 'Published',
+                'is_featured': '',
+            },
+        )
+
+        self.assertRedirects(response, reverse('posts'))
+        self.other_post.refresh_from_db()
+        self.assertEqual(self.other_post.blog_body, body)
+        reload_response = self.client.get(
+            reverse('edit_post', args=[self.other_post.pk])
+        )
+        self.assertContains(reload_response, body)
