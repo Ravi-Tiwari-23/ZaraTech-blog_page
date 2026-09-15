@@ -1,0 +1,33 @@
+{% load crispy_forms_tags %}
+{{ form.non_field_errors }}
+{{ form.title|as_crispy_field }}
+{{ form.Category|as_crispy_field }}
+{{ form.featured_image|as_crispy_field }}
+{{ form.short_description|as_crispy_field }}
+{{ form.blog_body|as_crispy_field }}
+{% include 'dashboard/_blog_editor.html' %}
+{{ form.status|as_crispy_field }}
+{{ form.is_featured|as_crispy_field }}
+
+<fieldset class="card card-body border-0 bg-light mb-4" data-seo-fields>
+    <legend class="h4">Search Engine Optimization</legend>
+    <p class="text-muted small">All fields are optional. Public pages use the post title, description, and body as safe fallbacks.</p>
+    {{ form.seo_title|as_crispy_field }}
+    <p class="text-muted small mt-n3"><span id="seo-title-count">0</span>/70 characters</p>
+    {{ form.meta_description|as_crispy_field }}
+    <p class="text-muted small mt-n3"><span id="meta-description-count">0</span>/160 characters</p>
+    {{ form.focus_keyword|as_crispy_field }}
+    {{ form.image_alt_text|as_crispy_field }}
+</fieldset>
+
+<script>
+(function () {
+    document.querySelectorAll('[data-character-counter]').forEach(function (field) {
+        var counter = document.getElementById(field.getAttribute('data-character-counter'));
+        if (!counter) return;
+        function updateCount() { counter.textContent = field.value.length; }
+        field.addEventListener('input', updateCount);
+        updateCount();
+    });
+}());
+</script>

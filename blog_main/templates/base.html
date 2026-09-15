@@ -6,17 +6,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#b3292f">
-    <meta name="robots" content="{% block robots %}index, follow{% endblock %}">
+    <meta name="robots" content="{% block robots %}{% if seo_noindex %}noindex, nofollow{% else %}index, follow{% endif %}{% endblock %}">
     <meta name="description" content="{% block meta_description %}Practical property guides, neighbourhood stories and real estate insights from GenVilla.{% endblock %}">
-    <link rel="canonical" href="{% block canonical_url %}{{ request.scheme }}://{{ request.get_host }}{{ request.path }}{% endblock %}">
+    <link rel="canonical" href="{% block canonical_url %}{{ canonical_url }}{% endblock %}">
     <meta property="og:title" content="{% block social_title %}GenVilla Insights{% endblock %}">
     <meta property="og:description" content="{% block social_description %}Smarter property decisions, made simple.{% endblock %}">
     <meta property="og:type" content="{% block social_type %}website{% endblock %}">
-    <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+    <meta property="og:url" content="{% block social_url %}{{ canonical_url }}{% endblock %}">
     <meta property="og:site_name" content="GenVilla Insights">
     {% block social_image %}
-    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'images/og.png' %}">
-    <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'images/og.png' %}">
+    <meta property="og:image" content="{{ default_social_image_url }}">
+    <meta name="twitter:image" content="{{ default_social_image_url }}">
     {% endblock %}
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{% block twitter_title %}GenVilla Insights{% endblock %}">

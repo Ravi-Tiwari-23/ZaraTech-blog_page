@@ -80,6 +80,7 @@ TEMPLATES = [
                 'blogs.context_processors.get_categories' , 
                 'blogs.context_processors.get_social_links' ,
                 'blogs.context_processors.get_user_roles',
+                'blogs.context_processors.get_seo_defaults',
             ],
         },
     },
@@ -143,6 +144,14 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL ='/media/'
+
+# Public origin used for canonical, social, and structured-data URLs. Keeping
+# this separate from the incoming Host header prevents preview/internal hosts
+# from leaking into production metadata.
+SEO_BASE_URL = os.environ.get(
+    'SEO_BASE_URL',
+    'https://blog.genvilla.in',
+).rstrip('/')
 MEDIA_ROOT = BASE_DIR /'media'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'

@@ -11,7 +11,7 @@
     <div class="archive-grid">
         {% for post in posts %}
         <article class="story-card" data-reveal style="--delay: {{ forloop.counter0 }}50ms">
-            <a class="story-image" href="{% url 'blogs' post.slug %}">{% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.title }}" loading="lazy" decoding="async">{% endif %}<span class="image-category">{{ post.Category.category_name }}</span></a>
+            <a class="story-image" href="{% url 'blogs' post.slug %}">{% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.image_alt_value }}" loading="lazy" decoding="async">{% endif %}<span class="image-category">{{ post.Category.category_name }}</span></a>
             <div class="story-card-body"><div class="story-meta"><span>{{ post.created_at|date:'M d, Y' }}</span><span>{{ post.author.get_full_name|default:post.author.username }}</span></div><h3><a href="{% url 'blogs' post.slug %}">{{ post.title }}</a></h3><p>{{ post.short_description|truncatewords:23 }}</p><div class="card-actions"><a class="story-link" href="{% url 'blogs' post.slug %}">Read article <i class="fa fa-long-arrow-right"></i></a>{% include "_bookmark_control.html" with post=post %}</div></div>
         </article>
         {% empty %}

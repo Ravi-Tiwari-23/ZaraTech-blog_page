@@ -22,6 +22,10 @@ class BlogPostForm(forms.ModelForm):
             'blog_body',
             'status',
             'is_featured',
+            'seo_title',
+            'meta_description',
+            'focus_keyword',
+            'image_alt_text',
         )
         widgets = {
             'blog_body': forms.Textarea(attrs={
@@ -30,6 +34,23 @@ class BlogPostForm(forms.ModelForm):
                 'class': 'rich-text-source',
                 'aria-describedby': 'blog-editor-help',
             }),
+            'seo_title': forms.TextInput(attrs={
+                'maxlength': '70',
+                'data-character-counter': 'seo-title-count',
+            }),
+            'meta_description': forms.Textarea(attrs={
+                'rows': 3,
+                'maxlength': '160',
+                'data-character-counter': 'meta-description-count',
+            }),
+            'focus_keyword': forms.TextInput(attrs={'maxlength': '100'}),
+            'image_alt_text': forms.TextInput(attrs={'maxlength': '255'}),
+        }
+        help_texts = {
+            'seo_title': 'Optional. Recommended: about 50–60 characters.',
+            'meta_description': 'Optional. Recommended: about 150–160 characters.',
+            'focus_keyword': 'Optional editorial guidance; this is not emitted as a meta keywords tag.',
+            'image_alt_text': 'Optional. Describe the featured image; the post title is used when blank.',
         }
 
 

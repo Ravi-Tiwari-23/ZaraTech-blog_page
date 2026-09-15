@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% block title %}{{ category_name }} Articles | GenVilla Insights{% endblock %}
 {% block meta_description %}Read {{ category_name }} property guides, market perspectives and practical real estate stories from GenVilla Insights.{% endblock %}
+{% block social_title %}{{ category_name }} Articles | GenVilla Insights{% endblock %}
+{% block social_description %}Read {{ category_name }} property guides, market perspectives and practical real estate stories from GenVilla Insights.{% endblock %}
+{% block twitter_title %}{{ category_name }} Articles | GenVilla Insights{% endblock %}
+{% block twitter_description %}Read {{ category_name }} property guides, market perspectives and practical real estate stories from GenVilla Insights.{% endblock %}
 {% block content %}
 <section class="archive-hero">
     <div class="site-shell" data-reveal><span class="eyebrow eyebrow-light">Explore by topic</span><h1>{{ category_name }}</h1><p>Fresh perspectives, practical guides and useful ideas selected for you.</p></div>
@@ -10,7 +14,7 @@
     <div class="archive-grid">
         {% for post in posts %}
         <article class="story-card" data-reveal style="--delay: {{ forloop.counter0 }}50ms">
-            <a class="story-image" href="{% url 'blogs' post.slug %}">{% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.title }}" loading="lazy" decoding="async">{% endif %}<span class="image-category">{{ category_name }}</span></a>
+            <a class="story-image" href="{% url 'blogs' post.slug %}">{% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.image_alt_value }}" loading="lazy" decoding="async">{% endif %}<span class="image-category">{{ category_name }}</span></a>
             <div class="story-card-body"><div class="story-meta"><span>{{ post.created_at|date:'M d, Y' }}</span><span>{{ post.author.get_full_name|default:post.author.username }}</span></div><h3><a href="{% url 'blogs' post.slug %}">{{ post.title }}</a></h3><p>{{ post.short_description|truncatewords:23 }}</p><div class="card-actions"><a class="story-link" href="{% url 'blogs' post.slug %}">Read article <i class="fa fa-long-arrow-right"></i></a>{% include "_bookmark_control.html" with post=post %}</div></div>
         </article>
         {% empty %}<div class="empty-state archive-empty"><i class="fa fa-folder-open-o"></i><h3>No stories here yet</h3><p>Explore another topic or check back soon.</p><a href="{% url 'home' %}" class="button button-primary">Back to all stories</a></div>{% endfor %}

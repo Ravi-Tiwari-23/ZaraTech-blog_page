@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% block title %}GenVilla Insights | Practical Property Guides & Real Estate Ideas{% endblock %}
 {% block meta_description %}Clear property guides, market perspectives and practical real estate insights for buyers, owners and curious city dwellers across India.{% endblock %}
+{% block social_title %}GenVilla Insights | Practical Property Guides & Real Estate Ideas{% endblock %}
+{% block social_description %}Clear property guides, market perspectives and practical real estate insights for buyers, owners and curious city dwellers across India.{% endblock %}
+{% block twitter_title %}GenVilla Insights | Practical Property Guides & Real Estate Ideas{% endblock %}
+{% block twitter_description %}Clear property guides, market perspectives and practical real estate insights for buyers, owners and curious city dwellers across India.{% endblock %}
 {% block content %}
 <section class="hero-section site-shell">
     {% if featured_post %}
@@ -8,7 +12,7 @@
         {% for post in featured_post %}
         <article class="hero-story hero-slide{% if forloop.first %} is-active{% endif %}" data-slide="{{ forloop.counter0 }}" aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}">
             <a class="hero-media" href="{% url 'blogs' post.slug %}" aria-label="Read {{ post.title }}">
-                {% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.title }}" decoding="async"{% if forloop.first %} fetchpriority="high"{% else %} loading="lazy"{% endif %}>{% endif %}
+                {% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.image_alt_value }}" decoding="async"{% if forloop.first %} fetchpriority="high"{% else %} loading="lazy"{% endif %}>{% endif %}
                 <span class="hero-shade"></span>
             </a>
             <div class="hero-content">
@@ -47,7 +51,7 @@
         {% if not forloop.first %}
         <article class="story-card" data-reveal style="--delay: {{ forloop.counter0 }}00ms">
             <a class="story-image" href="{% url 'blogs' post.slug %}">
-                {% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.title }}" loading="lazy">{% endif %}
+                {% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.image_alt_value }}" loading="lazy">{% endif %}
                 <span class="image-category">{{ post.Category.category_name }}</span>
             </a>
             <div class="story-card-body">
@@ -77,7 +81,7 @@
             {% for post in popular_posts %}
             <article class="popular-card" data-reveal style="--delay: {{ forloop.counter0 }}80ms">
                 <a class="popular-image" href="{% url 'blogs' post.slug %}">
-                    {% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.title }}" loading="lazy">{% endif %}
+                    {% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.image_alt_value }}" loading="lazy">{% endif %}
                     <span class="popular-rank">0{{ forloop.counter }}</span>
                 </a>
                 <div class="popular-card-body">
@@ -102,7 +106,7 @@
             <div class="article-feed">
                 {% for post in posts %}
                 <article class="feed-card" data-reveal>
-                    <a class="feed-image" href="{% url 'blogs' post.slug %}">{% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.title }}" loading="lazy">{% endif %}</a>
+                    <a class="feed-image" href="{% url 'blogs' post.slug %}">{% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.image_alt_value }}" loading="lazy">{% endif %}</a>
                     <div class="feed-content">
                         <a class="eyebrow" href="{% url 'posts_by_category' post.Category.id %}">{{ post.Category.category_name }}</a>
                         <h3><a href="{% url 'blogs' post.slug %}">{{ post.title }}</a></h3>

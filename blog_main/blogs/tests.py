@@ -1,3 +1,6 @@
+import json
+import re
+
 from django.contrib.auth.models import Group, User
 from django.core.exceptions import ValidationError
 from django.test import TestCase, override_settings
@@ -150,11 +153,89 @@ class BlogFeatureTests(TestCase):
         self.assertTrue(Comment.objects.filter(body='Authenticated comment').exists())
 
     def test_article_has_canonical_social_and_structured_metadata(self):
+        self.post.seo_title = 'Django MongoDB Deployment Guide'
+        self.post.meta_description = 'A production-focused deployment guide for Django and MongoDB.'
+        self.post.image_alt_text = 'Django application deployment diagram'
+        self.post.featured_image = 'uploads/deployment-diagram.jpg'
+        self.post.save()
+
+        response = self.client.get(reverse('blogs', args=[self.post.slug]))
+        content = response.content.decode()
+        structured_data = [
+            json.loads(item)
+            for item in re.findall(
+                r'<script type="application/ld\+json">(.*?)</script>',
+                content,
+                re.DOTALL,
+            )
+        ]
+        blog_posting = next(
+            item for item in structured_data if item['@type'] == 'BlogPosting'
+        )
+        breadcrumbs = next(
+            item for item in structured_data if item['@type'] == 'BreadcrumbList'
+        )
+
+        canonical = f'https://blog.genvilla.in{reverse("blogs", args=[self.post.slug])}'
+        self.assertContains(response, f'<title>{self.post.seo_document_title}</title>', html=False)
+        self.assertContains(response, f'<link rel="canonical" href="{canonical}">', html=False)
+        self.assertContains(response, f'<meta property="og:url" content="{canonical}">', html=False)
+        self.assertContains(response, '<meta property="og:type" content="article">', html=False)
+        self.assertContains(response, '<meta property="og:title"', html=False)
+        self.assertContains(response, '<meta property="og:description"', html=False)
+        self.assertContains(response, '<meta property="og:image" content="https://blog.genvilla.in/media/uploads/deployment-diagram.jpg">', html=False)
+        self.assertContains(response, '<meta name="twitter:card" content="summary_large_image">', html=False)
+        self.assertContains(response, 'article:published_time')
+        self.assertEqual(blog_posting['headline'], self.post.seo_title)
+        self.assertEqual(blog_posting['author']['name'], 'Ravi Tiwari')
+        self.assertEqual(blog_posting['mainEntityOfPage']['@id'], canonical)
+        self.assertTrue(blog_posting['datePublished'])
+        self.assertTrue(blog_posting['dateModified'])
+        self.assertEqual(breadcrumbs['itemListElement'][-1]['item'], canonical)
+        self.assertContains(response, f'alt="{self.post.image_alt_text}"', html=False)
+
+    def test_seo_fallbacks_strip_markup_and_do_not_duplicate_brand(self):
+        self.post.seo_title = 'GenVilla Insights deployment notes'
+        self.post.meta_description = ''
+        self.post.short_description = '<strong>Useful</strong>   deployment notes for readers.'
+        self.post.image_alt_text = ''
+        self.post.featured_image = 'uploads/fallback.jpg'
+        self.post.save()
+
         response = self.client.get(reverse('blogs', args=[self.post.slug]))
 
-        self.assertContains(response, '<link rel="canonical"', html=False)
-        self.assertContains(response, 'application/ld+json')
-        self.assertContains(response, 'article:published_time')
+        self.assertContains(response, '<title>GenVilla Insights deployment notes</title>', html=False)
+        self.assertContains(
+            response,
+            '<meta name="description" content="Useful deployment notes for readers.">',
+            html=False,
+        )
+        self.assertContains(response, f'alt="{self.post.title}"', html=False)
+        self.assertNotContains(response, '<meta name="keywords"', html=False)
+
+    def test_hostile_seo_content_cannot_break_attributes_or_json_ld_scripts(self):
+        hostile = '\" onmouseover=\"alert(1)\"><script>alert(2)</script>'
+        self.post.title = 'Article </script><script>alert(3)</script>'
+        self.post.seo_title = hostile[:70]
+        self.post.meta_description = hostile
+        self.post.image_alt_text = hostile
+        self.post.featured_image = 'uploads/security.jpg'
+        self.post.save()
+
+        response = self.client.get(reverse('blogs', args=[self.post.slug]))
+        content = response.content.decode()
+        scripts = re.findall(
+            r'<script type="application/ld\+json">(.*?)</script>',
+            content,
+            re.DOTALL,
+        )
+
+        self.assertEqual(len(scripts), 2)
+        for script in scripts:
+            json.loads(script)
+        self.assertNotIn('</script><script>alert(2)</script>', content)
+        self.assertIn('&quot;', content)
+        self.assertIn('\\u003C', ''.join(scripts))
 
     def test_article_renders_supported_formatting_and_escapes_unsafe_html(self):
         self.post.blog_body = (
@@ -200,8 +281,12 @@ class BlogFeatureTests(TestCase):
         response = self.client.get(reverse('django.contrib.sitemaps.views.sitemap'))
 
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(response['Content-Type'].startswith('application/xml'))
         self.assertContains(response, reverse('blogs', args=[self.post.slug]))
         self.assertNotContains(response, reverse('blogs', args=[draft.slug]))
+
+        draft_response = self.client.get(reverse('blogs', args=[draft.slug]))
+        self.assertEqual(draft_response.status_code, 404)
 
     def test_robots_and_error_templates_are_safe(self):
         robots = self.client.get(reverse('robots_txt'))
@@ -209,8 +294,25 @@ class BlogFeatureTests(TestCase):
 
         self.assertContains(robots, 'Allow: /')
         self.assertContains(robots, 'Disallow: /dashboard/')
+        self.assertContains(robots, 'Disallow: /account/')
+        self.assertContains(robots, 'Disallow: /saved/')
+        self.assertContains(robots, 'Sitemap: https://blog.genvilla.in/sitemap.xml')
+        self.assertTrue(robots['Content-Type'].startswith('text/plain'))
         self.assertIn('Something unexpected happened', rendered_500)
         self.assertNotIn('traceback', rendered_500.lower())
+
+    def test_public_pages_are_indexable_and_private_pages_are_noindex(self):
+        home = self.client.get(reverse('home'))
+        category = self.client.get(
+            reverse('posts_by_category', args=[self.category.pk])
+        )
+        login = self.client.get(reverse('login'))
+
+        self.assertEqual(home.status_code, 200)
+        self.assertEqual(category.status_code, 200)
+        self.assertContains(home, '<meta name="robots" content="index, follow">', html=False)
+        self.assertContains(category, '<meta name="robots" content="index, follow">', html=False)
+        self.assertContains(login, '<meta name="robots" content="noindex, nofollow">', html=False)
 
     def test_custom_500_is_branded_and_safe(self):
         from blog_main.views import custom_500
@@ -277,8 +379,11 @@ class DashboardPermissionTests(TestCase):
         )
 
         self.assertContains(add_response, 'data-blog-editor-toolbar')
+        self.assertContains(add_response, 'Search Engine Optimization')
+        self.assertContains(add_response, 'seo-title-count')
         self.assertContains(edit_response, 'data-blog-editor-toolbar')
         self.assertContains(edit_response, self.other_post.blog_body)
+        self.assertContains(edit_response, '<meta name="robots" content="noindex, nofollow">', html=False)
 
     def test_long_formatted_article_saves_and_reloads_through_edit_view(self):
         self.client.login(username='other', password='test-pass-123')

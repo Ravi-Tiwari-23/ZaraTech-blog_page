@@ -1,6 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.html import strip_tags
 from django.utils.text import slugify
+from django.utils.text import Truncator
+
+import html
+import re
 
 
 class Category(models.Model):
@@ -24,6 +29,14 @@ STATUS_CHOICES = (
 
 class Blog(models.Model):
     title = models.CharField(max_length=100)
+
+    seo_title = models.CharField(max_length=70, blank=True, default='')
+
+    meta_description = models.CharField(max_length=160, blank=True, default='')
+
+    focus_keyword = models.CharField(max_length=100, blank=True, default='')
+
+    image_alt_text = models.CharField(max_length=255, blank=True, default='')
 
     slug = models.SlugField(max_length=150, unique=True, blank=True)
     Category = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -66,6 +79,42 @@ class Blog(models.Model):
     def reading_time(self):
         words = len(self.blog_body.split())
         return max(1, round(words / 200))
+
+    @staticmethod
+    def _plain_text(value):
+        """Return compact text suitable for metadata, never raw HTML."""
+        value = html.unescape(strip_tags(value or ''))
+        value = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', value)
+        value = re.sub(r'(^|\s)[#>*_`~-]+(?=\s|$)', ' ', value)
+        return re.sub(r'\s+', ' ', value).strip()
+
+    @property
+    def seo_title_value(self):
+        return self._plain_text(self.seo_title) or self._plain_text(self.title)
+
+    @property
+    def seo_document_title(self):
+        title = self.seo_title_value
+        if 'genvilla insights' in title.lower():
+            return title
+        return f'{title} | GenVilla Insights'
+
+    @property
+    def meta_description_value(self):
+        description = (
+            self._plain_text(self.meta_description)
+            or self._plain_text(self.short_description)
+            or self._plain_text(self.blog_body)
+        )
+        return Truncator(description).chars(160)
+
+    @property
+    def image_alt_value(self):
+        return self._plain_text(self.image_alt_text) or self._plain_text(self.title)
+
+    @property
+    def author_name(self):
+        return self.author.get_full_name() or self.author.username
 
     def __str__(self):
         return self.title

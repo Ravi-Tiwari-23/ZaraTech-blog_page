@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Search{% if keyword %}: {{ keyword }}{% endif %} | GenVilla Insights{% endblock %}
 {% block meta_description %}{% if keyword %}Search results for {{ keyword }} on GenVilla Insights.{% else %}Search GenVilla Insights property guides and real estate stories.{% endif %}{% endblock %}
-{% block robots %}noindex, follow{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
 {% block content %}
 <section class="search-page site-shell">
     <header class="search-heading" data-reveal><span class="eyebrow">Find your next useful read</span><h1>{% if keyword %}Search results for “{{ keyword }}”{% else %}Search GenVilla Insights{% endif %}</h1><p>{% if blogs %}We found {{ blogs|length }} stor{{ blogs|length|pluralize:"y,ies" }} matching your search.{% else %}Search by city, property topic or question.{% endif %}</p></header>
@@ -10,7 +10,7 @@
     <div class="search-results">
         {% for post in blogs %}
         <article class="feed-card" data-reveal>
-            <a class="feed-image" href="{% url 'blogs' post.slug %}">{% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.title }}" loading="lazy" decoding="async">{% endif %}</a>
+            <a class="feed-image" href="{% url 'blogs' post.slug %}">{% if post.featured_image %}<img src="{{ post.featured_image.url }}" alt="{{ post.image_alt_value }}" loading="lazy" decoding="async">{% endif %}</a>
             <div class="feed-content"><a class="eyebrow" href="{% url 'posts_by_category' post.Category.id %}">{{ post.Category.category_name }}</a><h3><a href="{% url 'blogs' post.slug %}">{{ post.title }}</a></h3><p>{{ post.short_description|truncatewords:24 }}</p><div class="story-meta"><span>{{ post.created_at|date:'M d, Y' }}</span><span>{{ post.reading_time }} min read</span><span><i class="fa fa-eye"></i> {{ post.views }}</span></div></div>
             <button class="bookmark-button feed-bookmark" data-bookmark="{{ post.slug }}" type="button" aria-label="Save article"><i class="fa fa-bookmark-o"></i></button>
         </article>

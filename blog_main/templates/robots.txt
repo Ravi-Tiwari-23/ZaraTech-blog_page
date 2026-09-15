@@ -1,9 +1,12 @@
 User-agent: *
 Allow: /
 Disallow: /admin/
+Disallow: /account/
 Disallow: /dashboard/
 Disallow: /login/
+Disallow: /logout/
 Disallow: /register/
 Disallow: /blogs/search/
+Disallow: /saved/
 
-Sitemap: {{ request.scheme }}://{{ request.get_host }}{% url 'django.contrib.sitemaps.views.sitemap' %}
+Sitemap: {{ site_url }}{% url 'django.contrib.sitemaps.views.sitemap' %}
