@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Verify reset code | GenVilla Insights{% endblock %}
+{% block robots %}noindex, follow{% endblock %}
+
+{% block content %}
+<div style="min-height: 72vh; display: flex; align-items: center; justify-content: center; padding: 48px 20px; background: var(--bg, #f7f7f5);">
+    <div style="width: 100%; max-width: 520px; box-sizing: border-box; background: var(--surface-elevated, #ffffff); border: 1px solid var(--border, #e7e2dc); border-radius: 22px; padding: clamp(26px, 6vw, 40px); box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);">
+        <div style="font-size: 12px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: #c52c35; margin-bottom: 12px;">
+            Account Security
+        </div>
+        <h1 style="margin: 0; font-size: clamp(28px, 7vw, 34px); line-height: 1.2; color: var(--text, #18202a);">
+            Verify your reset code
+        </h1>
+        <p style="margin: 14px 0 28px; font-size: 15px; line-height: 1.7; color: var(--text-muted, #667085);">
+            Enter the 6-digit verification code sent to <strong style="color: var(--text, #18202a); word-break: break-word;">{{ masked_email }}</strong>.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <label for="{{ form.otp.id_for_label }}" style="display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600; color: var(--text, #18202a);">
+                Verification code
+            </label>
+            {% if form.otp.errors %}
+                <div style="margin-bottom: 10px; color: #dc3545; font-size: 13px;">
+                    {% for error in form.otp.errors %}<div>{{ error }}</div>{% endfor %}
+                </div>
+            {% endif %}
+            <input type="text" name="{{ form.otp.html_name }}" id="{{ form.otp.id_for_label }}" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" autocomplete="one-time-code" placeholder="Enter 6-digit code" value="{{ form.otp.value|default:'' }}" required style="width: 100%; box-sizing: border-box; padding: 15px 16px; border-radius: 12px; border: 1px solid var(--border, #d9d5cf); background: var(--surface, #ffffff); color: var(--text, #18202a); font-size: 18px; letter-spacing: 4px; outline: none; margin-bottom: 18px;">
+            <button type="submit" style="width: 100%; border: none; border-radius: 12px; padding: 15px 18px; background: #c52c35; color: #ffffff; font-size: 16px; font-weight: 700; cursor: pointer;">
+                Verify code
+            </button>
+        </form>
+
+        {% url 'resend_password_reset_otp' as resend_url %}
+        {% include "accounts/_otp_resend.html" with resend_url=resend_url resend_wait=resend_wait %}
+
+        <p style="margin: 26px 0 0; text-align: center; color: var(--text-muted, #667085); font-size: 12px; line-height: 1.6;">
+            The code expires in 5 minutes. Never share your verification code with anyone.
+        </p>
+    </div>
+</div>
+{% endblock %}

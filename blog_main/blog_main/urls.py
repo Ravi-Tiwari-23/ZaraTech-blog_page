@@ -50,7 +50,15 @@ urlpatterns = [
     #Dashboards
     path('dashboard/', include('dashboards.urls')),
 
+    path(
+    "account/",
+    include("accounts.urls"),
+    ),
+
 ] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
 
 handler404 = 'blog_main.views.custom_404'
 handler500 = 'blog_main.views.custom_500'
+
+
+

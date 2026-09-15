@@ -1,0 +1,85 @@
+<div style="
+    margin-top: 26px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border, #e7e2dc);
+    text-align: center;
+">
+    <p style="margin: 0 0 8px; color: var(--text-muted, #667085); font-size: 14px;">
+        Didn’t receive the code?
+    </p>
+
+    <p id="resendTimer" aria-live="polite" style="
+        margin: 0 0 14px;
+        color: var(--text-muted, #667085);
+        font-size: 13px;
+        line-height: 1.5;
+    ">
+        You can resend the code in
+        <strong id="resendSeconds" style="color: #c52c35; font-variant-numeric: tabular-nums;">
+            {{ resend_wait|default:0 }}
+        </strong>
+        seconds
+    </p>
+
+    <p id="resendReady" aria-live="polite" style="
+        display: none;
+        margin: 0 0 14px;
+        color: var(--text-muted, #667085);
+        font-size: 13px;
+    ">
+        You can request another code now.
+    </p>
+
+    <form method="post" action="{{ resend_url }}">
+        {% csrf_token %}
+        <button type="submit" id="resendButton" {% if resend_wait %}disabled{% endif %} style="
+            border: 1px solid var(--border, #d9d5cf);
+            border-radius: 10px;
+            padding: 11px 20px;
+            background: transparent;
+            color: var(--text, #18202a);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s ease, background 0.2s ease;
+        ">
+            Resend code
+        </button>
+    </form>
+</div>
+
+<script>
+    (function () {
+        const button = document.getElementById("resendButton");
+        const timer = document.getElementById("resendTimer");
+        const seconds = document.getElementById("resendSeconds");
+        const ready = document.getElementById("resendReady");
+        let remaining = Number("{{ resend_wait|default:0 }}") || 0;
+
+        if (!button || !timer || !seconds || !ready) {
+            return;
+        }
+
+        function renderCountdown() {
+            if (remaining > 0) {
+                button.disabled = true;
+                button.style.opacity = "0.45";
+                button.style.cursor = "not-allowed";
+                timer.style.display = "block";
+                ready.style.display = "none";
+                seconds.textContent = remaining;
+                remaining -= 1;
+                window.setTimeout(renderCountdown, 1000);
+                return;
+            }
+
+            button.disabled = false;
+            button.style.opacity = "1";
+            button.style.cursor = "pointer";
+            timer.style.display = "none";
+            ready.style.display = "block";
+        }
+
+        renderCountdown();
+    })();
+</script>
