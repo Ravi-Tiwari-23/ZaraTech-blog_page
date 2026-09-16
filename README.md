@@ -119,10 +119,10 @@ Production runs in AWS account `013565030464`, region `ap-south-1`, on the
 shared `genvilla-prod` ECS cluster and application load balancer.
 
 - `GenvillaBlogFoundation` owns the ECR repository, runtime secret, GitHub OIDC
-  deployment role, and retained media/CDN resources.
+  deployment role, retained CloudWatch log group, and media/CDN resources.
 - `GenvillaBlogProd` owns the ECS task definition and service, CloudWatch log
-  group, autoscaling policy, target group, TLS certificate attachment, and the
-  `blog.genvilla.in` listener rule.
+  permissions, autoscaling policy, target group, TLS certificate attachment,
+  and the `blog.genvilla.in` listener rule.
 
 The ECS task loads `MONGODB_URI`, `MONGODB_NAME`, Django, Cloudinary, and email
 credentials from the `genvilla-blog/runtime` secret. The migration container
