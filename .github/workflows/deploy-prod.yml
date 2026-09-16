@@ -1,0 +1,102 @@
+name: Deploy production blog
+
+on:
+  push:
+    branches: [prod]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: blog-production
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ap-south-1
+  ECR_REPOSITORY: genvilla-blog
+  AWS_ROLE_ARN: arn:aws:iam::013565030464:role/genvilla-blog-github-prod-deploy
+  ALB_DNS_NAME: Genvil-LoadB-SCbdKsRbpVWZ-663785608.ap-south-1.elb.amazonaws.com
+
+jobs:
+  deploy:
+    name: Test, build, and deploy
+    if: github.ref == 'refs/heads/prod'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    environment: production
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install application dependencies
+        run: pip install -r requirements.txt
+      - name: Check and test application
+        working-directory: blog_main
+        run: |
+          python manage.py check
+          python manage.py makemigrations --check --dry-run
+          python manage.py collectstatic --noinput
+          python manage.py test
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6.2.4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Sign in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2.1.6
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+        with:
+          platforms: arm64
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Build and push image
+        env:
+          ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          if aws ecr describe-images \
+            --repository-name "$ECR_REPOSITORY" \
+            --image-ids "imageTag=$IMAGE_TAG" >/dev/null 2>&1; then
+            echo "Image $IMAGE_TAG already exists; reusing it."
+          else
+            docker buildx build \
+              --platform linux/arm64 \
+              --pull \
+              --push \
+              --tag "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" \
+              .
+          fi
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: infra/package-lock.json
+      - name: Install infrastructure dependencies
+        run: npm ci --prefix infra
+      - name: Check infrastructure
+        run: npm run check --prefix infra
+      - name: Review production changes
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: npm run diff --prefix infra -- GenvillaBlogProd --context "genvilla-blog:imageTag=$IMAGE_TAG"
+      - name: Deploy ECS service
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: npm run deploy:prod --prefix infra -- --context "genvilla-blog:imageTag=$IMAGE_TAG"
+      - name: Smoke test
+        run: |
+          curl --fail --retry 12 --retry-delay 10 --retry-all-errors \
+            --connect-to "blog.genvilla.in:443:$ALB_DNS_NAME:443" \
+            https://blog.genvilla.in/healthz/
+          curl --fail --retry 12 --retry-delay 10 --retry-all-errors \
+            --connect-to "blog.genvilla.in:443:$ALB_DNS_NAME:443" \
+            https://blog.genvilla.in/ -o /dev/null

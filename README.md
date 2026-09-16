@@ -135,3 +135,31 @@ python manage.py test
 - Pillow
 
 The complete pinned dependency list is in `requirements.txt`.
+
+## Production deployment
+
+Production runs at `https://blog.genvilla.in` on the shared GenVilla ECS
+Fargate cluster in `ap-south-1`. It preserves the existing MongoDB data and
+Cloudinary media while moving the Django/Gunicorn runtime behind the shared
+application load balancer. Runtime credentials are injected from Secrets
+Manager.
+
+Pushes to `prod` run the production GitHub Actions workflow. It tests the
+application, builds and pushes an immutable ARM64 image to ECR, reviews the CDK
+diff, deploys the ECS service with automatic rollback, and smoke-tests the live
+site. GitHub authenticates to AWS through OIDC; no long-lived AWS keys are
+stored in GitHub.
+
+Infrastructure is split into two termination-protected stacks:
+
+- `GenvillaBlogFoundation`: ECR, media storage/CDN, runtime secret, deploy role.
+- `GenvillaBlogProd`: ECS task/service, runtime secrets, logs, target group, and
+  the `blog.genvilla.in` listener rule.
+
+Useful commands:
+
+```bash
+npm ci --prefix infra
+npm run check --prefix infra
+npm run synth --prefix infra -- --context genvilla-blog:imageTag=ci
+```

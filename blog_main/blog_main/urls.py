@@ -31,6 +31,7 @@ sitemaps = {
 }
 
 urlpatterns = [
+    path('healthz/', views.healthz, name='healthz'),
     path('admin/', admin.site.urls),
     path('', views.home , name='home'),
     path('category/', include('blogs.urls')),
@@ -62,6 +63,5 @@ urlpatterns = [
 
 handler404 = 'blog_main.views.custom_404'
 handler500 = 'blog_main.views.custom_500'
-
 
 

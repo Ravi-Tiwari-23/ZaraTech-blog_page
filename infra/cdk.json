@@ -1,0 +1,17 @@
+{
+  "app": "npx tsx bin/genvilla-blog.ts",
+  "context": {
+    "genvilla-blog:account": "013565030464",
+    "genvilla-blog:region": "ap-south-1",
+    "genvilla-blog:domain": "blog.genvilla.in",
+    "genvilla-blog:clusterName": "genvilla-prod",
+    "genvilla-blog:albSecurityGroupId": "sg-0d05c52f28736068b",
+    "genvilla-blog:httpsListenerArn": "arn:aws:elasticloadbalancing:ap-south-1:013565030464:listener/app/Genvil-LoadB-SCbdKsRbpVWZ/679ea3703adea11e/279e2cae73ffb0ab",
+    "genvilla-blog:certificateArn": "arn:aws:acm:ap-south-1:013565030464:certificate/c2a43f84-5da4-4331-932e-77baedd64c61",
+    "genvilla-blog:githubOidcSubject": "repo:genvilla-in@322783281/blog@1352720467:environment:production",
+    "genvilla-blog:imageTag": "bootstrap",
+    "@aws-cdk/aws-ec2:restrictDefaultSecurityGroup": true,
+    "@aws-cdk/core:defaultCrossStackReferences": "weak",
+    "@aws-cdk/core:validateAgainstDefaultRules": true
+  }
+}

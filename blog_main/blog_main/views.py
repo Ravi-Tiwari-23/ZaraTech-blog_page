@@ -1,7 +1,7 @@
 from django.contrib import auth, messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import Group
-from django.http import HttpResponseServerError
+from django.http import HttpResponseServerError, JsonResponse
 from django.shortcuts import redirect, render
 from django.template.loader import get_template
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -15,6 +15,10 @@ from assignments.models import About
 from blogs.models import Blog, Category, SavedPost
 
 from .forms import RegistrationForm
+
+
+def healthz(request):
+    return JsonResponse({"status": "ok", "service": "genvilla-blog"})
 
 
 def home(request):

@@ -1,0 +1,84 @@
+name: Blog CI
+
+on:
+  push:
+    branches: [main, prod]
+  pull_request:
+    branches: [main, prod]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: blog-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Django tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Check Django configuration
+        working-directory: blog_main
+        run: |
+          python manage.py check
+          python manage.py collectstatic --noinput
+      - name: Verify migrations
+        working-directory: blog_main
+        run: python manage.py makemigrations --check --dry-run
+      - name: Run tests
+        working-directory: blog_main
+        run: python manage.py test
+
+  infrastructure:
+    name: Check infrastructure
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: infra/package-lock.json
+      - name: Install infrastructure dependencies
+        run: npm ci --prefix infra
+      - name: Check infrastructure
+        run: npm run check --prefix infra
+      - name: Synthesize infrastructure
+        run: npm run synth --prefix infra -- --context genvilla-blog:imageTag=ci
+
+  arm64-image:
+    name: Build ARM64 production image
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+        with:
+          platforms: arm64
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Build ARM64 image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/arm64
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

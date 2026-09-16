@@ -1,7 +1,23 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from .forms import RegistrationForm
+
+
+@override_settings(
+    ALLOWED_HOSTS=["testserver"],
+    SECURE_REDIRECT_EXEMPT=[r"^healthz/$"],
+    SECURE_SSL_REDIRECT=True,
+)
+class HealthCheckTests(TestCase):
+    def test_internal_http_health_check_is_not_redirected(self):
+        response = self.client.get(reverse("healthz"), secure=False)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {"status": "ok", "service": "genvilla-blog"},
+        )
 
 
 class RegistrationFormTests(TestCase):
