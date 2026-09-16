@@ -1,165 +1,153 @@
-# Django Blog
+# GenVilla Insights
 
-A Django blog application with posts, categories, comments, search, user authentication, and a role-based dashboard for managing content and users.
+GenVilla Insights is the Django application behind
+[blog.genvilla.in](https://blog.genvilla.in). It provides the public editorial
+site, authentication, comments, saved posts, and the role-based content
+dashboard used by managers and editors.
 
-## Project location
+## Stack
 
-The updated project is located at:
+- Python 3.12 and Django 5.2
+- MongoDB through `django-mongodb-backend`
+- Cloudinary for uploaded media
+- WhiteNoise for versioned static assets
+- Gunicorn in an ARM64 container
+- Amazon ECS Fargate, ECR, ALB, CloudWatch Logs, and Secrets Manager
+- AWS CDK in TypeScript
+- GitHub Actions with AWS OIDC
 
-```text
-D:\ravi2\Desktop\blog
-```
+Production deliberately keeps the existing MongoDB database and Cloudinary
+media. Deploying the application does not copy or replace that data.
 
-Open this folder in VS Code. Do not use the older copy at `C:\Users\ravi2\Desktop\blog` if you want to run the latest changes.
-
-## Project structure
-
-```text
-blog/
-├── requirements.txt
-├── README.md
-└── blog_main/
-    ├── manage.py
-    ├── blog_main/       # Django settings, main URLs, views, and static files
-    ├── blogs/           # Posts, categories, comments, and public blog pages
-    ├── dashboards/      # Dashboard, post management, and user management
-    ├── assignments/     # Additional site content and models
-    └── templates/       # Public and dashboard HTML templates
-```
-
-## Setup in VS Code on Windows
-
-1. In VS Code, select **File > Open Folder**.
-2. Open `D:\ravi2\Desktop\blog`.
-3. Open a new terminal.
-4. Run the following commands from the project root:
-
-```bat
-venv\Scripts\activate.bat
-python -m pip install -r requirements.txt
-cd blog_main
-python manage.py migrate
-python manage.py runserver
-```
-
-Open <http://127.0.0.1:8000/> after the server starts.
-
-Stop the development server by pressing `Ctrl+C` in the terminal.
-
-## VS Code Python interpreter
-
-If VS Code asks you to choose an interpreter:
-
-1. Press `Ctrl+Shift+P`.
-2. Select **Python: Select Interpreter**.
-3. Choose:
+## Repository layout
 
 ```text
-D:\ravi2\Desktop\blog\venv\Scripts\python.exe
+.
+├── .github/workflows/       # CI and prod deployment workflows
+├── blog_main/               # Django project and applications
+│   ├── manage.py
+│   ├── accounts/
+│   ├── assignments/
+│   ├── blog_main/
+│   ├── blogs/
+│   ├── dashboards/
+│   └── templates/
+├── infra/                   # AWS CDK application
+├── Dockerfile
+└── requirements.txt
 ```
 
-## Running from the application directory
+## Local development
 
-If the terminal is already in `D:\ravi2\Desktop\blog\blog_main`, install the dependencies using the requirements file one directory above:
+Create and activate a virtual environment from the repository root, then
+install the pinned dependencies:
 
-```bat
-python -m pip install -r ..\requirements.txt
-python manage.py migrate
-python manage.py runserver
-```
-
-## Common errors
-
-### Python cannot find `manage.py`
-
-The terminal is in the wrong directory. Move to the directory containing `manage.py`:
-
-```bat
-cd /d D:\ravi2\Desktop\blog\blog_main
-python manage.py runserver
-```
-
-Do not run `cd dir`. That command tries to enter a folder literally named `dir`.
-
-### `No module named 'django'`
-
-Activate the virtual environment and install the project dependencies:
-
-```bat
-cd /d D:\ravi2\Desktop\blog
-venv\Scripts\activate.bat
-python -m pip install -r requirements.txt
-```
-
-If necessary, update pip first:
-
-```bat
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-### The terminal displays `>>>`
+On Windows PowerShell, activate the environment with:
 
-This is the interactive Python prompt, not the Django server. Exit it with:
-
-```python
-exit()
+```powershell
+.venv\Scripts\Activate.ps1
 ```
 
-Then run `python manage.py runserver` from the directory containing `manage.py`.
+Copy `.env.example` to `.env` and supply development credentials. Never commit
+the completed `.env` file. The MongoDB-backed application is started with:
 
-## Useful Django commands
+```bash
+cd blog_main
+DJANGO_SETTINGS_MODULE=blog_main.settings_mongo python manage.py migrate
+DJANGO_SETTINGS_MODULE=blog_main.settings_mongo python manage.py runserver
+```
 
-```bat
-# Check the project configuration
+Open <http://127.0.0.1:8000/>. The dashboard is at `/dashboard/`, Django Admin
+is at `/admin/`, and the service health endpoint is `/healthz/`.
+
+## Validation
+
+Run the same application checks used by CI:
+
+```bash
+cd blog_main
 python manage.py check
-
-# Create migrations after changing models
-python manage.py makemigrations
-
-# Apply database migrations
-python manage.py migrate
-
-# Create an administrator account
-python manage.py createsuperuser
-
-# Run the tests
+python manage.py makemigrations --check --dry-run
+python manage.py collectstatic --noinput
 python manage.py test
 ```
 
-## Main dependencies
-
-- Django 4.2
-- django-crispy-forms
-- crispy-bootstrap4
-- Pillow
-
-The complete pinned dependency list is in `requirements.txt`.
-
-## Production deployment
-
-Production runs at `https://blog.genvilla.in` on the shared GenVilla ECS
-Fargate cluster in `ap-south-1`. It preserves the existing MongoDB data and
-Cloudinary media while moving the Django/Gunicorn runtime behind the shared
-application load balancer. Runtime credentials are injected from Secrets
-Manager.
-
-Pushes to `prod` run the production GitHub Actions workflow. It tests the
-application, builds and pushes an immutable ARM64 image to ECR, reviews the CDK
-diff, deploys the ECS service with automatic rollback, and smoke-tests the live
-site. GitHub authenticates to AWS through OIDC; no long-lived AWS keys are
-stored in GitHub.
-
-Infrastructure is split into two termination-protected stacks:
-
-- `GenvillaBlogFoundation`: ECR, media storage/CDN, runtime secret, deploy role.
-- `GenvillaBlogProd`: ECS task/service, runtime secrets, logs, target group, and
-  the `blog.genvilla.in` listener rule.
-
-Useful commands:
+Validate the infrastructure from the repository root:
 
 ```bash
 npm ci --prefix infra
 npm run check --prefix infra
+npm run format --prefix infra
 npm run synth --prefix infra -- --context genvilla-blog:imageTag=ci
 ```
+
+Build the production container locally with:
+
+```bash
+docker build --platform linux/arm64 -t genvilla-blog:local .
+```
+
+## CI/CD
+
+`.github/workflows/ci.yml` runs Django checks, migration drift detection, the
+test suite, CDK validation, and an ARM64 container build for pushes and pull
+requests targeting `main` or `prod`.
+
+`.github/workflows/deploy-prod.yml` is the only production deployment path. A
+push to `prod`:
+
+1. reruns application checks and tests;
+2. builds an immutable image tagged with the Git commit SHA;
+3. pushes the image to `genvilla-blog` in ECR;
+4. reviews and deploys the `GenvillaBlogProd` CDK diff; and
+5. smoke-tests the ECS target directly through the shared load balancer.
+
+The workflow uses the branch-restricted GitHub `production` environment and
+short-lived AWS credentials through OIDC. No AWS access keys or application
+secrets are stored in GitHub.
+
+## Production infrastructure
+
+Production runs in AWS account `013565030464`, region `ap-south-1`, on the
+shared `genvilla-prod` ECS cluster and application load balancer.
+
+- `GenvillaBlogFoundation` owns the ECR repository, runtime secret, GitHub OIDC
+  deployment role, and retained media/CDN resources.
+- `GenvillaBlogProd` owns the ECS task definition and service, CloudWatch log
+  group, autoscaling policy, target group, TLS certificate attachment, and the
+  `blog.genvilla.in` listener rule.
+
+The ECS task loads `MONGODB_URI`, `MONGODB_NAME`, Django, Cloudinary, and email
+credentials from the `genvilla-blog/runtime` secret. The migration container
+must finish successfully before Gunicorn starts. ECS deployment circuit
+breaking and CloudFormation rollback protect the current healthy revision.
+
+Useful operational commands:
+
+```bash
+aws ecs describe-services \
+  --cluster genvilla-prod \
+  --services genvilla-blog-prod \
+  --region ap-south-1
+
+aws logs tail /ecs/genvilla-prod/blog \
+  --follow \
+  --region ap-south-1
+```
+
+Routine releases should be made by pushing a reviewed commit to `prod`; do not
+run an ad-hoc ECS image update. Foundation changes are exceptional and should
+be reviewed with `cdk diff` before `npm run deploy:foundation --prefix infra`.
+
+## Runtime configuration
+
+The required variable names are documented in `.env.example`. Production
+values belong in AWS Secrets Manager. If a credential is rotated, update the
+secret and deploy a new task revision so ECS injects the new value.
