@@ -1,0 +1,70 @@
+[35mblog_main/accounts/tests.py[m[36m:[m[32m22[m[36m:[m            [1;31musername[m="reader",
+[35mblog_main/accounts/tests.py[m[36m:[m[32m65[m[36m:[m                    "[1;31musername[m": "new-reader",
+[35mblog_main/accounts/tests.py[m[36m:[m[32m72[m[36m:[m        user = User.objects.get([1;31musername[m="new-reader")
+[35mblog_main/accounts/tests.py[m[36m:[m[32m90[m[36m:[m            [1;31musername[m="verification-manager",
+[35mblog_main/accounts/tests.py[m[36m:[m[32m102[m[36m:[m                    "[1;31musername[m": "verified-reader",
+[35mblog_main/accounts/tests.py[m[36m:[m[32m108[m[36m:[m        pending_user = User.objects.get([1;31musername[m="verified-reader")
+[35mblog_main/accounts/tests.py[m[36m:[m[32m122[m[36m:[m        self.assertContains(users_response, pending_user.[1;31musername[m)
+[35mblog_main/accounts/tests.py[m[36m:[m[32m127[m[36m:[m            {"[1;31musername[m": self.user.[1;31musername[m, "password": self.password},
+[35mblog_main/accounts/tests.py[m[36m:[m[32m137[m[36m:[m            [1;31musername[m="manager",
+[35mblog_main/accounts/tests.py[m[36m:[m[32m146[m[36m:[m            {"[1;31musername[m": manager.[1;31musername[m, "password": self.password},
+[35mblog_main/accounts/tests.py[m[36m:[m[32m185[m[36m:[m            [1;31musername[m="inactive",
+[35mblog_main/accounts/tests.py[m[36m:[m[32m320[m[36m:[m                [1;31musername[m=self.user.[1;31musername[m,
+[35mblog_main/accounts/tests.py[m[36m:[m[32m326[m[36m:[m                [1;31musername[m=self.user.[1;31musername[m,
+[35mblog_main/blog_main/forms.py[m[36m:[m[32m8[m[36m:[m    [1;31musername[m = forms.CharField(
+[35mblog_main/blog_main/forms.py[m[36m:[m[32m15[m[36m:[m            'autocomplete': '[1;31musername[m',
+[35mblog_main/blog_main/forms.py[m[36m:[m[32m24[m[36m:[m        fields = ('email', '[1;31musername[m', 'password1', 'password2')
+[35mblog_main/blog_main/tests.py[m[36m:[m[32m8[m[36m:[m    def test_[1;31musername[m_limit_is_enforced_server_side(self):
+[35mblog_main/blog_main/tests.py[m[36m:[m[32m11[m[36m:[m            '[1;31musername[m': 'a' * 21,
+[35mblog_main/blog_main/tests.py[m[36m:[m[32m17[m[36m:[m        self.assertIn('Ensure this value has at most 20 characters', form.errors['[1;31musername[m'][0])
+[35mblog_main/blog_main/tests.py[m[36m:[m[32m22[m[36m:[m        self.assertIn('20 characters or fewer', form.fields['[1;31musername[m'].help_text)
+[35mblog_main/blog_main/tests.py[m[36m:[m[32m23[m[36m:[m        self.assertEqual(form.fields['[1;31musername[m'].widget.attrs['maxlength'], '20')
+[35mblog_main/blog_main/tests.py[m[36m:[m[32m26[m[36m:[m    def test_[1;31musername[m_is_independent_from_email(self):
+[35mblog_main/blog_main/tests.py[m[36m:[m[32m29[m[36m:[m            '[1;31musername[m': 'chosen-name',
+[35mblog_main/blog_main/tests.py[m[36m:[m[32m35[m[36m:[m        self.assertEqual(form.cleaned_data['[1;31musername[m'], 'chosen-name')
+[35mblog_main/blog_main/views.py[m[36m:[m[32m239[m[36m:[m            [1;31musername[m = form.cleaned_data["[1;31musername[m"]
+[35mblog_main/blog_main/views.py[m[36m:[m[32m244[m[36m:[m                [1;31musername[m=[1;31musername[m,
+[35mblog_main/blogs/admin.py[m[36m:[m[32m18[m[36m:[m    search_fields = ('body', 'user__[1;31musername[m', 'blog__title')
+[35mblog_main/blogs/management/commands/migrate_sqlite_to_mongo.py[m[36m:[m[32m76[m[36m:[m                    [1;31musername[m,
+[35mblog_main/blogs/management/commands/migrate_sqlite_to_mongo.py[m[36m:[m[32m94[m[36m:[m                    [1;31musername[m=row["[1;31musername[m"],
+[35mblog_main/blogs/models.py[m[36m:[m[32m117[m[36m:[m        return self.author.get_full_name() or self.author.[1;31musername[m
+[35mblog_main/blogs/models.py[m[36m:[m[32m146[m[36m:[m        return f"{self.user.[1;31musername[m}: {self.blog.title}"
+[35mblog_main/blogs/models.py[m[36m:[m[32m161[m[36m:[m        return f'{self.user.[1;31musername[m}: {self.body[:40]}'
+[35mblog_main/blogs/tests.py[m[36m:[m[32m65[m[36m:[m        self.client.login([1;31musername[m='author', password='test-pass-123')
+[35mblog_main/blogs/tests.py[m[36m:[m[32m86[m[36m:[m        self.client.login([1;31musername[m='author', password='test-pass-123')
+[35mblog_main/blogs/tests.py[m[36m:[m[32m111[m[36m:[m        self.client.login([1;31musername[m='second-reader', password='test-pass-123')
+[35mblog_main/blogs/tests.py[m[36m:[m[32m122[m[36m:[m        self.client.login([1;31musername[m='author', password='test-pass-123')
+[35mblog_main/blogs/tests.py[m[36m:[m[32m150[m[36m:[m        self.client.login([1;31musername[m='author', password='test-pass-123')
+[35mblog_main/blogs/tests.py[m[36m:[m[32m355[m[36m:[m        self.client.login([1;31musername[m='editor', password='test-pass-123')
+[35mblog_main/blogs/tests.py[m[36m:[m[32m360[m[36m:[m        self.client.login([1;31musername[m='editor', password='test-pass-123')
+[35mblog_main/blogs/tests.py[m[36m:[m[32m365[m[36m:[m        self.client.login([1;31musername[m='manager', password='test-pass-123')
+[35mblog_main/blogs/tests.py[m[36m:[m[32m374[m[36m:[m        self.client.login([1;31musername[m='other', password='test-pass-123')
+[35mblog_main/blogs/tests.py[m[36m:[m[32m389[m[36m:[m        self.client.login([1;31musername[m='other', password='test-pass-123')
+[35mblog_main/dashboards/forms.py[m[36m:[m[32m84[m[36m:[m        fields = ('first_name', 'last_name', 'email', '[1;31musername[m', 'role', 'password1', 'password2')
+[35mblog_main/dashboards/forms.py[m[36m:[m[32m102[m[36m:[m        fields = ('first_name', 'last_name', 'email', '[1;31musername[m', 'role', 'is_active')
+[35mblog_main/dashboards/tests.py[m[36m:[m[32m90[m[36m:[m            with self.subTest(user=user.[1;31musername[m):
+[35mblog_main/dashboards/tests.py[m[36m:[m[32m131[m[36m:[m        self.assertNotContains(users_response, inactive.[1;31musername[m)
+[35mblog_main/dashboards/views.py[m[36m:[m[32m158[m[36m:[m    users_list = User.objects.filter(is_active=True).order_by('[1;31musername[m')
+[35mblog_main/mongo_migrations/auth/0001_initial.py[m[36m:[m[32m60[m[36m:[m                ('[1;31musername[m', models.CharField(error_messages={'unique': 'A user with that [1;31musername[m already exists.'}, help_text='Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.', max_length=150, unique=True, validators=[django.contrib.auth.validators.UnicodeUsernameValidator()], verbose_name='[1;31musername[m')),
+[35mblog_main/templates/base.html[m[36m:[m[32m58[m[36m:[m                    {% if user.is_authenticated %}<span>Welcome, {{ user.first_name|default:user.[1;31musername[m }}</span>{% endif %}
+[35mblog_main/templates/blogs.html[m[36m:[m[32m33[m[36m:[m            <div class="author-avatar">{{ single_blog.author.[1;31musername[m|first|upper }}</div>
+[35mblog_main/templates/blogs.html[m[36m:[m[32m34[m[36m:[m            <div><strong>{{ single_blog.author.get_full_name|default:single_blog.author.[1;31musername[m }}</strong><small>Property contributor</small></div>
+[35mblog_main/templates/blogs.html[m[36m:[m[32m55[m[36m:[m                <div class="author-avatar author-avatar-large">{{ single_blog.author.[1;31musername[m|first|upper }}</div>
+[35mblog_main/templates/blogs.html[m[36m:[m[32m56[m[36m:[m                <div><span class="eyebrow">Written by</span><h3>{{ single_blog.author.get_full_name|default:single_blog.author.[1;31musername[m }}</h3><p>Sharing practical perspectives to make property decisions clearer, calmer and more rewarding.</p></div>
+[35mblog_main/templates/blogs.html[m[36m:[m[32m69[m[36m:[m                        <div class="author-avatar">{{ comment.user.[1;31musername[m|first|upper }}</div>
+[35mblog_main/templates/blogs.html[m[36m:[m[32m70[m[36m:[m                        <div><h3>{{ comment.user.get_full_name|default:comment.user.[1;31musername[m }}</h3><small><time datetime="{{ comment.created_at|date:'c' }}">{{ comment.created_at|timesince }} ago</time></small><div class="comment-copy">{{ comment.body|linebreaksbr }}</div></div>
+[35mblog_main/templates/blogs.html[m[36m:[m[32m83[m[36m:[m                    <span><strong>{{ post.title }}</strong><small>{{ post.author.get_full_name|default:post.author.[1;31musername[m }}</small></span>
+[35mblog_main/templates/blogs.html[m[36m:[m[32m95[m[36m:[m                    <span class="article-popular-copy"><strong>{{ post.title }}</strong><small><i class="fa fa-eye"></i> {{ post.views }} · {{ post.author.get_full_name|default:post.author.[1;31musername[m }}</small></span>
+[35mblog_main/templates/dashboard/comment_delete.html[m[36m:[m[32m10[m[36m:[m                <p>Delete this comment by <strong>{{ comment.user.[1;31musername[m }}</strong> on <strong>{{ comment.blog.title }}</strong>?</p>
+[35mblog_main/templates/dashboard/comment_detail.html[m[36m:[m[32m2[m[36m:[m{% block title %}Comment by {{ comment.user.[1;31musername[m }} | GenVilla Dashboard{% endblock %}
+[35mblog_main/templates/dashboard/comment_detail.html[m[36m:[m[32m14[m[36m:[m                    <dt class="col-sm-3">Commenter</dt><dd class="col-sm-9">{{ comment.user.[1;31musername[m }}</dd>
+[35mblog_main/templates/dashboard/comments.html[m[36m:[m[32m24[m[36m:[m                        <td><strong>{{ comment.user.[1;31musername[m }}</strong></td>
+[35mblog_main/templates/dashboard/dashboard.html[m[36m:[m[32m8[m[36m:[m            <div><h2 class="mb-0">Dashboard</h2><small class="text-muted">Welcome, {{ user.get_full_name|default:user.[1;31musername[m }}{% if is_manager %} · Manager{% else %} · Editor{% endif %}</small></div>
+[35mblog_main/templates/dashboard/edit_user.html[m[36m:[m[32m4[m[36m:[m{% block content %}<div class="row">{% include 'dashboard/sidebar.html' %}<div class="col-md-9"><h2>Edit {{ edited_user.[1;31musername[m }}</h2><form action="{% url 'edit_user' edited_user.id %}" method="POST" class="card card-body border-0 shadow-sm">{% csrf_token %}{{ form|crispy }}<div><button class="btn btn-warning">Save changes</button> <a href="{% url 'users' %}" class="btn btn-light">Cancel</a></div></form></div></div>{% endblock %}
+[35mblog_main/templates/dashboard/users.html[m[36m:[m[32m7[m[36m:[m{% for account in users_list %}<tr><td><strong>{{ account.[1;31musername[m }}</strong><small class="d-block text-muted">{{ account.get_full_name|default:'—' }}</small></td><td>{{ account.email|default:'—' }}</td><td>{% if account.is_superuser %}<span class="badge badge-dark">Superuser</span>{% else %}{% for group in account.groups.all %}<span class="badge badge-warning">{{ group.name }}</span>{% empty %}<span class="badge badge-light">Reader</span>{% endfor %}{% endif %}</td><td>{% if account.is_active %}<span class="text-success">Active</span>{% else %}<span class="text-muted">Inactive</span>{% endif %}</td><td><a href="{% url 'edit_user' account.id %}" class="text-success mr-2" title="Edit"><i class="fa fa-edit"></i></a>{% if not account.is_superuser and account != user %}<form action="{% url 'delete_user' account.id %}" method="POST" class="d-inline" onsubmit="return confirm('Delete this user and their content?');">{% csrf_token %}<button class="btn btn-link text-danger p-0" title="Delete"><i class="fa fa-trash"></i></button></form>{% endif %}</td></tr>
+[35mblog_main/templates/home.html[m[36m:[m[32m22[m[36m:[m                <div class="story-meta story-meta-light"><span>By {{ post.author.get_full_name|default:post.author.[1;31musername[m }}</span><span>{{ post.created_at|date:'M d, Y' }}</span></div>
+[35mblog_main/templates/home.html[m[36m:[m[32m58[m[36m:[m                <div class="story-meta"><span>{{ post.created_at|date:'M d, Y' }}</span><span>{{ post.author.get_full_name|default:post.author.[1;31musername[m }}</span></div>
+[35mblog_main/templates/home.html[m[36m:[m[32m90[m[36m:[m                    <div class="popular-meta"><span><i class="fa fa-eye"></i> {{ post.views }} views</span><span>{{ post.author.get_full_name|default:post.author.[1;31musername[m }}</span></div>
+[35mblog_main/templates/home.html[m[36m:[m[32m114[m[36m:[m                        <div class="story-meta"><span>{{ post.created_at|timesince }} ago</span><span><i class="fa fa-eye"></i> {{ post.views }}</span><span>{{ post.author.get_full_name|default:post.author.[1;31musername[m }}</span></div>
+[35mblog_main/templates/posts_by_category.html[m[36m:[m[32m18[m[36m:[m            <div class="story-card-body"><div class="story-meta"><span>{{ post.created_at|date:'M d, Y' }}</span><span>{{ post.author.get_full_name|default:post.author.[1;31musername[m }}</span></div><h3><a href="{% url 'blogs' post.slug %}">{{ post.title }}</a></h3><p>{{ post.short_description|truncatewords:23 }}</p><div class="card-actions"><a class="story-link" href="{% url 'blogs' post.slug %}">Read article <i class="fa fa-long-arrow-right"></i></a>{% include "_bookmark_control.html" with post=post %}</div></div>
+[35mblog_main/templates/saved_posts.html[m[36m:[m[32m15[m[36m:[m            <div class="story-card-body"><div class="story-meta"><span>{{ post.created_at|date:'M d, Y' }}</span><span>{{ post.author.get_full_name|default:post.author.[1;31musername[m }}</span></div><h3><a href="{% url 'blogs' post.slug %}">{{ post.title }}</a></h3><p>{{ post.short_description|truncatewords:23 }}</p><div class="card-actions"><a class="story-link" href="{% url 'blogs' post.slug %}">Read article <i class="fa fa-long-arrow-right"></i></a>{% include "_bookmark_control.html" with post=post %}</div></div>
