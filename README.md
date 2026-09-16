@@ -129,6 +129,10 @@ credentials from the `genvilla-blog/runtime` secret. The migration container
 must finish successfully before Gunicorn starts. ECS deployment circuit
 breaking and CloudFormation rollback protect the current healthy revision.
 
+The ALB and container readiness probes call `GET /healthz/`. That exact path is
+answered before Django validates the probe's private-IP `Host` header; all
+normal application requests continue through strict `ALLOWED_HOSTS` checking.
+
 Useful operational commands:
 
 ```bash
