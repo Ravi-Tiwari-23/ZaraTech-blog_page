@@ -107,7 +107,11 @@ push to `prod`:
 2. builds an immutable image tagged with the Git commit SHA;
 3. pushes the image to `genvilla-blog` in ECR;
 4. reviews and deploys the `GenvillaBlogProd` CDK diff; and
-5. smoke-tests the ECS target directly through the shared load balancer.
+5. smoke-tests the public HTTPS health endpoint and homepage through Cloudflare.
+
+The shared load balancer accepts traffic only from Cloudflare. Smoke tests
+therefore use the public hostname, with bounded connection timeouts and retries.
+The health response must identify the `genvilla-blog` service and report `ok`.
 
 The workflow uses the branch-restricted GitHub `production` environment and
 short-lived AWS credentials through OIDC. No AWS access keys or application
