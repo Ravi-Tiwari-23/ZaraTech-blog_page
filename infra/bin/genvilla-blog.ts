@@ -28,6 +28,7 @@ const prod = new ProdStack(app, "GenvillaBlogProd", {
   stackName: "GenvillaBlogProd",
   repository: foundation.repository,
   runtimeSecret: foundation.runtimeSecret,
+  logGroup: foundation.blogLogGroup,
   imageTag: requiredContext(app, "genvilla-blog:imageTag"),
   domainName: requiredContext(app, "genvilla-blog:domain"),
   clusterName: requiredContext(app, "genvilla-blog:clusterName"),

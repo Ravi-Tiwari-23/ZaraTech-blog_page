@@ -3,6 +3,7 @@ import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import * as ecr from "aws-cdk-lib/aws-ecr";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as logs from "aws-cdk-lib/aws-logs";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
@@ -12,6 +13,7 @@ interface FoundationStackProps extends cdk.StackProps {
 }
 
 export class FoundationStack extends cdk.Stack {
+  public readonly blogLogGroup: logs.ILogGroup;
   public readonly repository: ecr.IRepository;
   public readonly mediaBucket: s3.IBucket;
   public readonly mediaDomainName: string;
@@ -41,6 +43,13 @@ export class FoundationStack extends cdk.Stack {
       rulePriority: 1,
     });
     this.repository = repository;
+
+    const blogLogGroup = new logs.LogGroup(this, "BlogLogs", {
+      logGroupName: "/ecs/genvilla-prod/blog",
+      retention: logs.RetentionDays.ONE_MONTH,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
+    this.blogLogGroup = blogLogGroup;
 
     const mediaBucket = new s3.Bucket(this, "MediaBucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,

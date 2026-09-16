@@ -10,6 +10,7 @@ import { Construct } from "constructs";
 interface ProdStackProps extends cdk.StackProps {
   readonly repository: ecr.IRepository;
   readonly runtimeSecret: secretsmanager.ISecret;
+  readonly logGroup: logs.ILogGroup;
   readonly imageTag: string;
   readonly domainName: string;
   readonly clusterName: string;
@@ -63,11 +64,7 @@ export class ProdStack extends cdk.Stack {
         },
       },
     );
-    const logGroup = new logs.LogGroup(this, "BlogLogs", {
-      logGroupName: "/ecs/genvilla-prod/blog",
-      retention: logs.RetentionDays.ONE_MONTH,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
-    });
+    const logGroup = props.logGroup;
     const image = ecs.ContainerImage.fromEcrRepository(
       props.repository,
       props.imageTag,
