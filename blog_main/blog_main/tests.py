@@ -5,13 +5,16 @@ from .forms import RegistrationForm
 
 
 @override_settings(
-    ALLOWED_HOSTS=["testserver"],
-    SECURE_REDIRECT_EXEMPT=[r"^healthz/$"],
+    ALLOWED_HOSTS=["blog.genvilla.in"],
     SECURE_SSL_REDIRECT=True,
 )
 class HealthCheckTests(TestCase):
-    def test_internal_http_health_check_is_not_redirected(self):
-        response = self.client.get(reverse("healthz"), secure=False)
+    def test_internal_http_health_check_bypasses_private_ip_host_validation(self):
+        response = self.client.get(
+            reverse("healthz"),
+            secure=False,
+            HTTP_HOST="172.31.30.16:8000",
+        )
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(

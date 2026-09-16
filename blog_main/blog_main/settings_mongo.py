@@ -115,6 +115,7 @@ CSRF_TRUSTED_ORIGINS = [
 # =========================================================
 
 MIDDLEWARE = [
+    "blog_main.middleware.HealthCheckMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
 
