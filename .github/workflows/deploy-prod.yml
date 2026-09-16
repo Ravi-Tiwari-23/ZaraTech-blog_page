@@ -17,7 +17,6 @@ env:
   AWS_REGION: ap-south-1
   ECR_REPOSITORY: genvilla-blog
   AWS_ROLE_ARN: arn:aws:iam::013565030464:role/genvilla-blog-github-prod-deploy
-  ALB_DNS_NAME: Genvil-LoadB-SCbdKsRbpVWZ-663785608.ap-south-1.elb.amazonaws.com
 
 jobs:
   deploy:
@@ -93,10 +92,15 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: npm run deploy:prod --prefix infra -- --context "genvilla-blog:imageTag=$IMAGE_TAG"
       - name: Smoke test
+        timeout-minutes: 4
         run: |
-          curl --fail --retry 12 --retry-delay 10 --retry-all-errors \
-            --connect-to "blog.genvilla.in:443:$ALB_DNS_NAME:443" \
-            https://blog.genvilla.in/healthz/
-          curl --fail --retry 12 --retry-delay 10 --retry-all-errors \
-            --connect-to "blog.genvilla.in:443:$ALB_DNS_NAME:443" \
-            https://blog.genvilla.in/ -o /dev/null
+          # The shared ALB only accepts Cloudflare traffic. Exercise that public path.
+          curl --fail --silent --show-error --connect-timeout 10 --max-time 20 \
+            --retry 3 --retry-delay 5 --retry-all-errors \
+            --header 'Cache-Control: no-cache' \
+            "https://blog.genvilla.in/healthz/?release=${GITHUB_SHA}" \
+            --output /tmp/blog-health.json
+          python -c 'import json; h=json.load(open("/tmp/blog-health.json")); assert h.get("status") == "ok" and h.get("service") == "genvilla-blog", h'
+          curl --fail --silent --show-error --connect-timeout 10 --max-time 20 \
+            --retry 3 --retry-delay 5 --retry-all-errors \
+            "https://blog.genvilla.in/?release=${GITHUB_SHA}" --output /dev/null
