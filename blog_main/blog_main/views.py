@@ -1,5 +1,4 @@
 from django.contrib import auth, messages
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import Group
 from django.http import HttpResponseServerError, JsonResponse
 from django.shortcuts import redirect, render
@@ -14,7 +13,7 @@ from accounts.utils import (
 from assignments.models import About
 from blogs.models import Blog, Category, SavedPost
 
-from .forms import RegistrationForm
+from .forms import EmailOrUsernameAuthenticationForm, RegistrationForm
 
 
 def healthz(request):
@@ -234,20 +233,13 @@ def login(request):
         return redirect("home")
 
     if request.method == "POST":
-        form = AuthenticationForm(
+        form = EmailOrUsernameAuthenticationForm(
             request,
             request.POST,
         )
 
         if form.is_valid():
-            username = form.cleaned_data["username"]
-            password = form.cleaned_data["password"]
-
-            user = auth.authenticate(
-                request,
-                username=username,
-                password=password,
-            )
+            user = form.get_user()
 
             if user is not None:
                 auth.login(
@@ -286,7 +278,7 @@ def login(request):
                 return redirect("home")
 
     else:
-        form = AuthenticationForm()
+        form = EmailOrUsernameAuthenticationForm()
 
     context = {
         "form": form,
