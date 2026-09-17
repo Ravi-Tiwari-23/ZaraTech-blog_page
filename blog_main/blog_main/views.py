@@ -1,9 +1,14 @@
+import secrets
+
+from django.conf import settings
 from django.contrib import auth, messages
 from django.contrib.auth.models import Group
 from django.http import HttpResponseServerError, JsonResponse
 from django.shortcuts import redirect, render
 from django.template.loader import get_template
+from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_GET
 
 from accounts.utils import (
     create_otp_session,
@@ -11,6 +16,7 @@ from accounts.utils import (
 )
 
 from assignments.models import About
+from blogs.context_processors import absolute_public_url
 from blogs.models import Blog, Category, SavedPost
 
 from .forms import EmailOrUsernameAuthenticationForm, RegistrationForm
@@ -18,6 +24,51 @@ from .forms import EmailOrUsernameAuthenticationForm, RegistrationForm
 
 def healthz(request):
     return JsonResponse({"status": "ok", "service": "genvilla-blog"})
+
+
+@require_GET
+def posts_api(request):
+    configured_key = settings.GENVILLA_BLOG_API_KEY
+
+    # Fail closed when the server has not been configured. In particular,
+    # two missing values must never compare as a successful authentication.
+    if not isinstance(configured_key, str) or not configured_key:
+        return JsonResponse({"error": "Service unavailable"}, status=503)
+
+    supplied_key = request.headers.get("X-API-Key")
+    if (
+        not isinstance(supplied_key, str)
+        or not secrets.compare_digest(supplied_key, configured_key)
+    ):
+        return JsonResponse({"error": "Unauthorized"}, status=401)
+
+    posts = (
+        Blog.objects.filter(status="Published")
+        .prefetch_related("author")
+        .order_by("-created_at")[:10]
+    )
+
+    return JsonResponse({
+        "posts": [
+            {
+                "title": post.title,
+                "slug": post.slug,
+                "description": Blog._plain_text(post.short_description),
+                "author": post.author_name,
+                "image": (
+                    absolute_public_url(post.featured_image.url)
+                    if post.featured_image
+                    else None
+                ),
+                "published_at": post.created_at.isoformat(),
+                "updated_at": post.updated_at.isoformat(),
+                "url": absolute_public_url(
+                    reverse("blogs", args=[post.slug])
+                ),
+            }
+            for post in posts
+        ],
+    })
 
 
 def home(request):

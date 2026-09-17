@@ -23,6 +23,9 @@ load_dotenv(BASE_DIR / ".env")
 # Resend API
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
 
+# Server-to-server authentication for the read-only public-posts API.
+GENVILLA_BLOG_API_KEY = os.environ.get("GENVILLA_BLOG_API_KEY")
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 

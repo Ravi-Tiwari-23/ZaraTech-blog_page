@@ -55,8 +55,9 @@ On Windows PowerShell, activate the environment with:
 .venv\Scripts\Activate.ps1
 ```
 
-Copy `.env.example` to `.env` and supply development credentials. Never commit
-the completed `.env` file. The MongoDB-backed application is started with:
+Copy `.env.example` to `blog_main/.env` and supply development credentials.
+That path matches `BASE_DIR / ".env"` in the Django settings. Never commit the
+completed `.env` file. The MongoDB-backed application is started with:
 
 ```bash
 cd blog_main
@@ -66,6 +67,22 @@ DJANGO_SETTINGS_MODULE=blog_main.settings_mongo python manage.py runserver
 
 Open <http://127.0.0.1:8000/>. The dashboard is at `/dashboard/`, Django Admin
 is at `/admin/`, and the service health endpoint is `/healthz/`.
+
+The read-only published-posts endpoint is `GET /api/posts/`. It requires the
+same secret on the blog server and its server-side consumer in the
+`X-API-Key` header. Generate a secret locally without saving its output to a
+tracked file:
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+Add `GENVILLA_BLOG_API_KEY=<secret>` manually to the ignored local `.env` when
+needed. For a Render deployment, add the same variable manually under
+`genvilla-blog` -> **Environment**. Never expose this value to browser code or
+commit it to the repository. Restart `runserver` after adding or changing the
+value because Django settings are loaded when the server process starts; an
+already-running process does not reload settings when `.env` changes.
 
 ## Validation
 
