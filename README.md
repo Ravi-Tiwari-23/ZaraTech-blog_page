@@ -1,4 +1,4 @@
-# Django Blog
+# Zara It
 
 A Django blog application with posts, categories, comments, search, user authentication, and a role-based dashboard for managing content and users.
 
