@@ -223,23 +223,23 @@ def send_otp_email(email, otp, purpose):
     """
 
     if purpose == "email_verification":
-        subject = f"{otp} is your GenVilla verification code"
+        subject = f"{otp} is your ZaraTech verification code"
         heading = "Verify your email"
         intro = (
             "Use the verification code below to "
-            "verify your GenVilla account."
+            "verify your ZaraTech account."
         )
 
     elif purpose == "password_reset":
-        subject = f"{otp} is your GenVilla password reset code"
+        subject = f"{otp} is your ZaraTech password reset code"
         heading = "Reset your password"
         intro = (
             "Use the verification code below to "
-            "continue resetting your GenVilla password."
+            "continue resetting your ZaraTech password."
         )
 
     else:
-        subject = f"{otp} is your GenVilla verification code"
+        subject = f"{otp} is your ZaraTech verification code"
         heading = "Verification code"
         intro = (
             "Use the verification code below to continue."
@@ -250,6 +250,7 @@ def send_otp_email(email, otp, purpose):
         "heading": heading,
         "intro": intro,
         "expiry_minutes": 5,
+        "site_url": settings.SEO_BASE_URL,
     }
 
     html_body = render_to_string(
@@ -261,7 +262,7 @@ def send_otp_email(email, otp, purpose):
 
     response = resend.Emails.send(
         {
-            "from": "GenVilla <noreply@mail.genvilla.in>",
+            "from": settings.DEFAULT_FROM_EMAIL,
             "to": [email],
             "subject": subject,
             "html": html_body,

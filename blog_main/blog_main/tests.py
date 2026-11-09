@@ -25,7 +25,7 @@ class HealthCheckTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.json(),
-            {"status": "ok", "service": "genvilla-blog"},
+            {"status": "ok", "service": "zaratech-blog"},
         )
 
 
@@ -85,7 +85,7 @@ class PostsApiTests(TestCase):
         self.assertEqual(item["author"], "Public Author")
         self.assertIsNone(item["image"])
         self.assertEqual(urlsplit(item["url"]).scheme, "https")
-        self.assertEqual(urlsplit(item["url"]).netloc, "blog.genvilla.in")
+        self.assertEqual(urlsplit(item["url"]).netloc, "zaratech-blog.vercel.app")
         self.assertEqual(
             urlsplit(item["url"]).path,
             reverse("blogs", args=[post.slug]),
@@ -174,7 +174,7 @@ class PostsApiTests(TestCase):
 
         self.assertEqual(
             item["image"],
-            "https://blog.genvilla.in/media/uploads/api-image.jpg",
+            "https://zaratech-blog.vercel.app/media/uploads/api-image.jpg",
         )
 
     def test_post_is_not_accepted(self):
@@ -192,7 +192,7 @@ class PostsApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.json(),
-            {"status": "ok", "service": "genvilla-blog"},
+            {"status": "ok", "service": "zaratech-blog"},
         )
 
 

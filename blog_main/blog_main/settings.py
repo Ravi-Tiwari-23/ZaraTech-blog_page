@@ -200,7 +200,7 @@ MEDIA_URL ='/media/'
 # from leaking into production metadata.
 SEO_BASE_URL = os.environ.get(
     'SEO_BASE_URL',
-    'https://blog.genvilla.in',
+    'https://zaratech-blog.vercel.app',
 ).rstrip('/')
 MEDIA_ROOT = BASE_DIR /'media'
 
@@ -223,7 +223,7 @@ EMAIL_USE_TLS = (
 
 DEFAULT_FROM_EMAIL = os.environ.get(
     "DEFAULT_FROM_EMAIL",
-    "GenVilla <noreply@mail.genvilla.in>",
+    "ZaraTech <noreply@mail.genvilla.in>",
 )
 
 if not DEBUG:

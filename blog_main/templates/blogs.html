@@ -31,7 +31,7 @@
         <p class="article-deck">{{ single_blog.short_description }}</p>
         <div class="article-byline">
             <div class="author-avatar">{{ single_blog.author.username|first|upper }}</div>
-            <div><strong>{{ single_blog.author.get_full_name|default:single_blog.author.username }}</strong><small>Property contributor</small></div>
+            <div><strong>{{ single_blog.author.get_full_name|default:single_blog.author.username }}</strong><small>Technology contributor</small></div>
             <span class="byline-divider"></span>
             <div class="article-facts"><span>Published <time datetime="{{ single_blog.created_at|date:'c' }}">{{ single_blog.created_at|date:'M d, Y' }}</time></span><span>Updated <time datetime="{{ single_blog.updated_at|date:'c' }}">{{ single_blog.updated_at|date:'M d, Y' }}</time></span><span>{{ single_blog.reading_time }} min read</span><span><i class="fa fa-eye" aria-hidden="true"></i> {{ single_blog.views }} views</span></div>
         </div>
@@ -53,7 +53,7 @@
             <div class="article-end" data-reveal><span></span><i class="fa fa-building"></i><span></span></div>
             <section class="author-card" data-reveal>
                 <div class="author-avatar author-avatar-large">{{ single_blog.author.username|first|upper }}</div>
-                <div><span class="eyebrow">Written by</span><h3>{{ single_blog.author.get_full_name|default:single_blog.author.username }}</h3><p>Sharing practical perspectives to make property decisions clearer, calmer and more rewarding.</p></div>
+                <div><span class="eyebrow">Written by</span><h3>{{ single_blog.author.get_full_name|default:single_blog.author.username }}</h3><p>Sharing practical perspectives that make complex technology clearer and more useful.</p></div>
             </section>
 
             <section id="comments" class="comments-section" data-reveal>
@@ -61,7 +61,7 @@
                 {% if user.is_authenticated %}
                 <form method="POST" class="comment-form">{% csrf_token %}<label class="sr-only" for="{{ comment_form.body.id_for_label }}">Your comment</label>{{ comment_form.body }}{% if comment_form.body.errors %}<div class="form-errors" role="alert">{{ comment_form.body.errors }}</div>{% endif %}<button type="submit" class="button button-primary">Post comment</button></form>
                 {% else %}
-                <div class="login-prompt"><i class="fa fa-comment-o"></i><div><strong>Have a perspective to add?</strong><p>Log in to share it with the GenVilla community.</p></div><a class="button button-outline button-small" href="{% url 'login' %}?next={{ request.path|urlencode }}">Log in</a></div>
+                <div class="login-prompt"><i class="fa fa-comment-o"></i><div><strong>Have a perspective to add?</strong><p>Log in to share it with the ZaraTech community.</p></div><a class="button button-outline button-small" href="{% url 'login' %}?next={{ request.path|urlencode }}">Log in</a></div>
                 {% endif %}
                 <div class="comment-list">
                     {% for comment in comments %}
@@ -87,7 +87,7 @@
             {% endif %}
             {% if popular_posts %}
             <div class="article-popular-panel" data-reveal>
-                <div class="article-popular-heading"><span class="eyebrow">Reader favourites</span><h2>Popular on GenVilla</h2></div>
+                <div class="article-popular-heading"><span class="eyebrow">Reader favourites</span><h2>Popular on ZaraTech</h2></div>
                 {% for post in popular_posts %}
                 <a href="{% url 'blogs' post.slug %}" class="article-popular-story">
                     <span class="article-popular-rank">0{{ forloop.counter }}</span>

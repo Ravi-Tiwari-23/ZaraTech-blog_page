@@ -1,0 +1,11 @@
+.git
+.env
+.env.*
+!.env.example
+venv
+blog_main/db.sqlite3
+blog_main/media
+blog_main/staticfiles
+infra
+__pycache__
+*.pyc

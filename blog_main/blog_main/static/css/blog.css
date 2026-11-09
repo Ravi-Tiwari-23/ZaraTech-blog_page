@@ -1,19 +1,19 @@
 :root {
   color-scheme: light;
   --bg: #fff; --surface: #fff; --surface-elevated: #faf9f7; --text: #151a24; --text-muted: #667085;
-  --border: #e4e1dc; --brand: #b3292f; --brand-hover: #8f1f24; --header-bg: rgba(255,255,255,.96);
-  --input-bg: #fff; --focus-ring: rgba(179,41,47,.35); --danger: #9f2026; --disabled-bg: #e9ecef; --disabled-text: #6c757d;
+  --border: #dfe5f0; --brand: #2563eb; --brand-hover: #1d4ed8; --header-bg: rgba(255,255,255,.96);
+  --input-bg: #fff; --focus-ring: rgba(37,99,235,.35); --danger: #b42318; --disabled-bg: #e9ecef; --disabled-text: #6c757d;
   --ink: var(--text); --muted: var(--text-muted); --paper: var(--bg); --canvas: #f7f6f3; --canvas-deep: #efece6;
-  --brand-dark: var(--brand-hover); --brand-soft: #f9e9e8; --navy: #152738;
-  --gold: #d29c46; --line: var(--border); --shadow: 0 16px 40px rgba(31,35,48,.09);
+  --brand-dark: var(--brand-hover); --brand-soft: #e8f0ff; --navy: #0b1633;
+  --gold: #22d3ee; --line: var(--border); --shadow: 0 16px 40px rgba(31,35,48,.09);
   --shadow-hover: 0 22px 54px rgba(31,35,48,.15); --radius-sm: 10px; --radius: 18px; --radius-lg: 26px;
 }
 html[data-theme="dark"] {
   color-scheme: dark;
   --bg: #0f141b; --surface: #151c25; --surface-elevated: #1a222d; --text: #f4f5f7; --text-muted: #a8b0bc;
-  --border: #2b3542; --brand: #e05a60; --brand-hover: #ee7479; --header-bg: rgba(15,20,27,.96);
-  --input-bg: #111821; --focus-ring: rgba(224,90,96,.42); --danger: #ff8b91; --disabled-bg: #232c37; --disabled-text: #858e9b;
-  --canvas: #111821; --canvas-deep: #1a222d; --brand-soft: #3b2026; --navy: #152738;
+  --border: #2b3542; --brand: #60a5fa; --brand-hover: #93c5fd; --header-bg: rgba(15,20,27,.96);
+  --input-bg: #111821; --focus-ring: rgba(96,165,250,.42); --danger: #ff8b91; --disabled-bg: #232c37; --disabled-text: #858e9b;
+  --canvas: #111821; --canvas-deep: #1a222d; --brand-soft: #172b55; --navy: #0b1633;
   --shadow: 0 16px 40px rgba(0,0,0,.28); --shadow-hover: 0 22px 54px rgba(0,0,0,.38);
 }
 * { box-sizing: border-box; }
@@ -44,7 +44,7 @@ main { min-width: 0; overflow-x: clip; }
 .main-nav { height: 78px; display: grid; grid-template-columns: auto minmax(280px,510px) auto; align-items: center; gap: 34px; }
 .brand { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); white-space: nowrap; }
 .brand:hover { color: var(--ink); }
-.brand-mark { width: 38px; height: 38px; border-radius: 11px 11px 4px 11px; display: inline-grid; place-items: center; background: var(--brand); color: white; box-shadow: 0 7px 16px rgba(179,41,47,.22); }
+.brand-mark { width: 38px; height: 38px; border-radius: 11px 11px 4px 11px; display: inline-grid; place-items: center; background: var(--brand); color: white; box-shadow: 0 7px 16px rgba(37,99,235,.24); }
 .brand-copy { font-size: 1.25rem; font-weight: 800; line-height: 1; }
 .brand-copy small { display: block; color: var(--brand); font: 700 .62rem/1.35 "DM Sans",sans-serif; letter-spacing: .18em; text-transform: uppercase; }
 .header-search { height: 44px; display: flex; align-items: center; border: 1px solid var(--line); background: var(--surface-elevated); border-radius: 999px; padding-left: 17px; transition: box-shadow 180ms ease,border-color 180ms ease,background 180ms ease; }
@@ -64,8 +64,8 @@ html[data-theme="dark"] .theme-icon-sun { display: inline-block; }
 .button { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 0 22px; border-radius: 9px; border: 1px solid transparent; font-weight: 700; line-height: 1; transition: transform 180ms ease,box-shadow 180ms ease,background 180ms ease; }
 .button:hover { transform: translateY(-2px); }
 .button-small { min-height: 40px; padding-inline: 17px; font-size: .88rem; }
-.button-primary { background: var(--brand); color: white; box-shadow: 0 8px 20px rgba(179,41,47,.19); }
-.button-primary:hover { background: var(--brand-dark); color: white; box-shadow: 0 12px 25px rgba(179,41,47,.25); }
+.button-primary { background: var(--brand); color: white; box-shadow: 0 8px 20px rgba(37,99,235,.2); }
+.button-primary:hover { background: var(--brand-dark); color: white; box-shadow: 0 12px 25px rgba(37,99,235,.28); }
 .button-outline { border-color: var(--line); background: var(--surface); }
 .button-outline:hover { border-color: var(--brand); }
 .button-light { background: white; color: var(--ink); }

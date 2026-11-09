@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
-{% block title %}Create an account | GenVilla Insights{% endblock %}
-{% block meta_description %}Create a GenVilla Insights account to join thoughtful conversations about property and real estate.{% endblock %}
+{% block title %}Create an account | ZaraTech Insights{% endblock %}
+{% block meta_description %}Create a ZaraTech Insights account to join thoughtful conversations about technology and engineering.{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 {% block content %}
 {% load crispy_forms_tags %}
 <section class="auth-page">
     <div class="auth-shell" data-reveal>
-        <div class="auth-story register-story"><span class="eyebrow eyebrow-light">Join the community</span><h1>Make space for better property ideas.</h1><p>Create an account to take part in thoughtful conversations and discover clear property guidance.</p><ul class="auth-benefits"><li><i class="fa fa-check" aria-hidden="true"></i> Comment and exchange ideas</li><li><i class="fa fa-check" aria-hidden="true"></i> Discover practical guides across India</li><li><i class="fa fa-check" aria-hidden="true"></i> Learn from fresh property perspectives</li></ul></div>
-        <div class="auth-form-panel"><a class="brand auth-brand" href="{% url 'home' %}"><span class="brand-mark" aria-hidden="true"><i class="fa fa-building"></i></span><span class="brand-copy">GenVilla <small>Insights</small></span></a><span class="eyebrow">Free membership</span><h2>Create your account</h2><p>A few details and you’re in.</p><form action="{% url 'register' %}" method="POST" class="auth-form" novalidate>{% csrf_token %}{{ form|crispy }}<button type="submit" class="button button-primary auth-submit"><span>Join GenVilla</span> <i class="fa fa-arrow-right" aria-hidden="true"></i></button></form><div class="auth-switch">Already have an account? <a href="{% url 'login' %}">Log in</a></div></div>
+        <div class="auth-story register-story"><span class="eyebrow eyebrow-light">Join the community</span><h1>Build a clearer view of technology.</h1><p>Create an account to take part in thoughtful conversations and discover practical engineering guidance.</p><ul class="auth-benefits"><li><i class="fa fa-check" aria-hidden="true"></i> Comment and exchange ideas</li><li><i class="fa fa-check" aria-hidden="true"></i> Discover practical engineering guides</li><li><i class="fa fa-check" aria-hidden="true"></i> Learn from fresh technology perspectives</li></ul></div>
+        <div class="auth-form-panel"><a class="brand auth-brand" href="{% url 'home' %}"><span class="brand-mark" aria-hidden="true"><i class="fa fa-code"></i></span><span class="brand-copy">ZaraTech <small>Insights</small></span></a><span class="eyebrow">Free membership</span><h2>Create your account</h2><p>A few details and you’re in.</p><form action="{% url 'register' %}" method="POST" class="auth-form" novalidate>{% csrf_token %}{{ form|crispy }}<button type="submit" class="button button-primary auth-submit"><span>Join ZaraTech</span> <i class="fa fa-arrow-right" aria-hidden="true"></i></button></form><div class="auth-switch">Already have an account? <a href="{% url 'login' %}">Log in</a></div></div>
     </div>
 </section>
 {% endblock %}

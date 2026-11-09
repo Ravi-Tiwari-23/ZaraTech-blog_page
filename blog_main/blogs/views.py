@@ -146,7 +146,7 @@ def blogs(request, slug):
         },
         'publisher': {
             '@type': 'Organization',
-            'name': 'GenVilla',
+            'name': 'ZaraTech',
             'url': absolute_public_url('/'),
         },
         'mainEntityOfPage': {

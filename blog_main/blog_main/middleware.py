@@ -9,6 +9,6 @@ class HealthCheckMiddleware:
 
     def __call__(self, request):
         if request.method == "GET" and request.path_info == "/healthz/":
-            return JsonResponse({"status": "ok", "service": "genvilla-blog"})
+            return JsonResponse({"status": "ok", "service": "zaratech-blog"})
 
         return self.get_response(request)

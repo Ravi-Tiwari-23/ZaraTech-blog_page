@@ -23,7 +23,7 @@ from .forms import EmailOrUsernameAuthenticationForm, RegistrationForm
 
 
 def healthz(request):
-    return JsonResponse({"status": "ok", "service": "genvilla-blog"})
+    return JsonResponse({"status": "ok", "service": "zaratech-blog"})
 
 
 @require_GET

@@ -5,28 +5,28 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#b3292f">
+    <meta name="theme-color" content="#2563eb">
     <meta name="robots" content="{% block robots %}{% if seo_noindex %}noindex, nofollow{% else %}index, follow{% endif %}{% endblock %}">
-    <meta name="description" content="{% block meta_description %}Practical property guides, neighbourhood stories and real estate insights from GenVilla.{% endblock %}">
+    <meta name="description" content="{% block meta_description %}Practical engineering guides, AI insights and technology analysis from ZaraTech.{% endblock %}">
     <link rel="canonical" href="{% block canonical_url %}{{ canonical_url }}{% endblock %}">
-    <meta property="og:title" content="{% block social_title %}GenVilla Insights{% endblock %}">
-    <meta property="og:description" content="{% block social_description %}Smarter property decisions, made simple.{% endblock %}">
+    <meta property="og:title" content="{% block social_title %}ZaraTech Insights{% endblock %}">
+    <meta property="og:description" content="{% block social_description %}Technology explained for builders and curious minds.{% endblock %}">
     <meta property="og:type" content="{% block social_type %}website{% endblock %}">
     <meta property="og:url" content="{% block social_url %}{{ canonical_url }}{% endblock %}">
-    <meta property="og:site_name" content="GenVilla Insights">
+    <meta property="og:site_name" content="ZaraTech Insights">
     {% block social_image %}
     <meta property="og:image" content="{{ default_social_image_url }}">
     <meta name="twitter:image" content="{{ default_social_image_url }}">
     {% endblock %}
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{% block twitter_title %}GenVilla Insights{% endblock %}">
-    <meta name="twitter:description" content="{% block twitter_description %}Smarter property decisions, made simple.{% endblock %}">
-    <title>{% block title %}GenVilla Insights{% endblock %}</title>
+    <meta name="twitter:title" content="{% block twitter_title %}ZaraTech Insights{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}Technology explained for builders and curious minds.{% endblock %}">
+    <title>{% block title %}ZaraTech Insights{% endblock %}</title>
     <script>
         (function () {
             var theme = 'light';
             try {
-                var savedTheme = localStorage.getItem('genvilla-theme');
+                var savedTheme = localStorage.getItem('zaratech-theme');
                 theme = savedTheme === 'light' || savedTheme === 'dark'
                     ? savedTheme
                     : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
@@ -34,7 +34,7 @@
                 theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             }
             document.documentElement.setAttribute('data-theme', theme);
-            document.querySelector('meta[name="theme-color"]').setAttribute('content', theme === 'dark' ? '#0f141b' : '#b3292f');
+            document.querySelector('meta[name="theme-color"]').setAttribute('content', theme === 'dark' ? '#0f141b' : '#2563eb');
         })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -52,23 +52,23 @@
     <header class="site-header">
         <div class="utility-bar">
             <div class="site-shell utility-inner">
-                <p><i class="fa fa-map-marker" aria-hidden="true"></i> Smarter property decisions, made simple</p>
+                <p><i class="fa fa-code" aria-hidden="true"></i> Build smarter. Understand technology.</p>
                 <div class="utility-links">
-                    <a href="{% url 'home' %}#market-guides">Market guides</a>
+                    <a href="{% url 'home' %}#tech-guides">Technology guides</a>
                     {% if user.is_authenticated %}<span>Welcome, {{ user.first_name|default:user.username }}</span>{% endif %}
                 </div>
             </div>
         </div>
 
         <div class="site-shell main-nav">
-            <a class="brand" href="{% url 'home' %}" aria-label="GenVilla Insights home">
-                <span class="brand-mark" aria-hidden="true"><i class="fa fa-building"></i></span>
-                <span class="brand-copy">GenVilla <small>Insights</small></span>
+            <a class="brand" href="{% url 'home' %}" aria-label="ZaraTech Insights home">
+                <span class="brand-mark" aria-hidden="true"><i class="fa fa-code"></i></span>
+                <span class="brand-copy">ZaraTech <small>Insights</small></span>
             </a>
             <form class="header-search" action="{% url 'search' %}" method="GET" role="search">
                 <i class="fa fa-search" aria-hidden="true"></i>
                 <label class="sr-only" for="site-search">Search articles</label>
-                <input id="site-search" type="search" name="keyword" value="{{ keyword }}" placeholder="Search guides, cities, trends...">
+                <input id="site-search" type="search" name="keyword" value="{{ keyword }}" placeholder="Search AI, cloud, security...">
                 <button type="submit">Search</button>
             </form>
             <div class="header-controls">
@@ -102,7 +102,7 @@
             </nav>
             <form class="mobile-search site-shell" action="{% url 'search' %}" method="GET" role="search">
                 <label class="sr-only" for="mobile-site-search">Search articles</label>
-                <input id="mobile-site-search" type="search" name="keyword" value="{{ keyword }}" placeholder="Search property insights...">
+                <input id="mobile-site-search" type="search" name="keyword" value="{{ keyword }}" placeholder="Search technology insights...">
                 <button type="submit" aria-label="Search"><i class="fa fa-search" aria-hidden="true"></i></button>
             </form>
             <div class="mobile-account-actions site-shell">
@@ -135,26 +135,26 @@
         <div class="site-shell footer-grid">
             <div>
                 <a class="brand brand-light" href="{% url 'home' %}">
-                    <span class="brand-mark"><i class="fa fa-building"></i></span>
-                    <span class="brand-copy">GenVilla <small>Insights</small></span>
+                    <span class="brand-mark"><i class="fa fa-code"></i></span>
+                    <span class="brand-copy">ZaraTech <small>Insights</small></span>
                 </a>
-                <p class="footer-intro">Clear, useful property intelligence for buyers, owners and curious city dwellers across India.</p>
+                <p class="footer-intro">Clear, practical technology intelligence for developers, founders and curious minds.</p>
             </div>
             <div>
                 <h3>Explore</h3>
-                <ul><li><a href="{% url 'home' %}#latest">Latest stories</a></li><li><a href="{% url 'home' %}#market-guides">Market guides</a></li>{% if has_dashboard_access %}<li><a href="{% url 'dashboard' %}">Editorial dashboard</a></li>{% endif %}</ul>
+                <ul><li><a href="{% url 'home' %}#latest">Latest stories</a></li><li><a href="{% url 'home' %}#tech-guides">Technology guides</a></li>{% if has_dashboard_access %}<li><a href="{% url 'dashboard' %}">Editorial dashboard</a></li>{% endif %}</ul>
             </div>
             <div>
                 <h3>Topics</h3>
-                <ul>{% for cat in categories|slice:":4" %}<li><a href="{% url 'posts_by_category' cat.id %}">{{ cat.category_name }}</a></li>{% empty %}<li><a href="{% url 'home' %}">Property insights</a></li>{% endfor %}</ul>
+                <ul>{% for cat in categories|slice:":4" %}<li><a href="{% url 'posts_by_category' cat.id %}">{{ cat.category_name }}</a></li>{% empty %}<li><a href="{% url 'home' %}">Technology insights</a></li>{% endfor %}</ul>
             </div>
             <div>
                 <h3>Stay in the know</h3>
-                <p class="footer-copy">Fresh ideas for better property decisions.</p>
+                <p class="footer-copy">Fresh ideas for better technology decisions.</p>
                 {% if social_links %}<div class="social-row">{% for link in social_links %}<a href="{{ link.link }}" target="_blank" rel="noopener" aria-label="{{ link.platform }}">{{ link.platform|first }}</a>{% endfor %}</div>{% endif %}
             </div>
         </div>
-        <div class="site-shell footer-bottom"><span>&copy; {% now "Y" %} GenVilla Insights</span><span>Made for modern India</span></div>
+        <div class="site-shell footer-bottom"><span>&copy; {% now "Y" %} ZaraTech Insights</span><span>Built for the next generation</span></div>
     </footer>
 
     <button class="back-to-top" type="button" aria-label="Back to top"><i class="fa fa-arrow-up"></i></button>
@@ -162,7 +162,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         (function () {
-            var themeKey = 'genvilla-theme';
+            var themeKey = 'zaratech-theme';
             var themeToggle = document.querySelector('.theme-toggle');
             var themeMedia = window.matchMedia('(prefers-color-scheme: dark)');
             var themeMeta = document.querySelector('meta[name="theme-color"]');

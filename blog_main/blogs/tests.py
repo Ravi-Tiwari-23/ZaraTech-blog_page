@@ -176,14 +176,14 @@ class BlogFeatureTests(TestCase):
             item for item in structured_data if item['@type'] == 'BreadcrumbList'
         )
 
-        canonical = f'https://blog.genvilla.in{reverse("blogs", args=[self.post.slug])}'
+        canonical = f'https://zaratech-blog.vercel.app{reverse("blogs", args=[self.post.slug])}'
         self.assertContains(response, f'<title>{self.post.seo_document_title}</title>', html=False)
         self.assertContains(response, f'<link rel="canonical" href="{canonical}">', html=False)
         self.assertContains(response, f'<meta property="og:url" content="{canonical}">', html=False)
         self.assertContains(response, '<meta property="og:type" content="article">', html=False)
         self.assertContains(response, '<meta property="og:title"', html=False)
         self.assertContains(response, '<meta property="og:description"', html=False)
-        self.assertContains(response, '<meta property="og:image" content="https://blog.genvilla.in/media/uploads/deployment-diagram.jpg">', html=False)
+        self.assertContains(response, '<meta property="og:image" content="https://zaratech-blog.vercel.app/media/uploads/deployment-diagram.jpg">', html=False)
         self.assertContains(response, '<meta name="twitter:card" content="summary_large_image">', html=False)
         self.assertContains(response, 'article:published_time')
         self.assertEqual(blog_posting['headline'], self.post.seo_title)
@@ -195,7 +195,7 @@ class BlogFeatureTests(TestCase):
         self.assertContains(response, f'alt="{self.post.image_alt_text}"', html=False)
 
     def test_seo_fallbacks_strip_markup_and_do_not_duplicate_brand(self):
-        self.post.seo_title = 'GenVilla Insights deployment notes'
+        self.post.seo_title = 'ZaraTech Insights deployment notes'
         self.post.meta_description = ''
         self.post.short_description = '<strong>Useful</strong>   deployment notes for readers.'
         self.post.image_alt_text = ''
@@ -204,7 +204,7 @@ class BlogFeatureTests(TestCase):
 
         response = self.client.get(reverse('blogs', args=[self.post.slug]))
 
-        self.assertContains(response, '<title>GenVilla Insights deployment notes</title>', html=False)
+        self.assertContains(response, '<title>ZaraTech Insights deployment notes</title>', html=False)
         self.assertContains(
             response,
             '<meta name="description" content="Useful deployment notes for readers.">',
@@ -296,7 +296,7 @@ class BlogFeatureTests(TestCase):
         self.assertContains(robots, 'Disallow: /dashboard/')
         self.assertContains(robots, 'Disallow: /account/')
         self.assertContains(robots, 'Disallow: /saved/')
-        self.assertContains(robots, 'Sitemap: https://blog.genvilla.in/sitemap.xml')
+        self.assertContains(robots, 'Sitemap: https://zaratech-blog.vercel.app/sitemap.xml')
         self.assertTrue(robots['Content-Type'].startswith('text/plain'))
         self.assertIn('Something unexpected happened', rendered_500)
         self.assertNotIn('traceback', rendered_500.lower())
@@ -320,7 +320,7 @@ class BlogFeatureTests(TestCase):
         response = custom_500(RequestFactory().get('/broken/'))
 
         self.assertEqual(response.status_code, 500)
-        self.assertIn(b'GenVilla Insights', response.content)
+        self.assertIn(b'ZaraTech Insights', response.content)
         self.assertNotIn(b'traceback', response.content.lower())
 
     @override_settings(DEBUG=False)
@@ -328,7 +328,7 @@ class BlogFeatureTests(TestCase):
         response = self.client.get('/this-page-does-not-exist/')
 
         self.assertEqual(response.status_code, 404)
-        self.assertContains(response, 'Page not found | GenVilla Insights', status_code=404)
+        self.assertContains(response, 'Page not found | ZaraTech Insights', status_code=404)
         self.assertContains(response, 'Search articles', status_code=404)
 
 

@@ -95,9 +95,9 @@ class Blog(models.Model):
     @property
     def seo_document_title(self):
         title = self.seo_title_value
-        if 'genvilla insights' in title.lower():
+        if 'zaratech insights' in title.lower():
             return title
-        return f'{title} | GenVilla Insights'
+        return f'{title} | ZaraTech Insights'
 
     @property
     def meta_description_value(self):

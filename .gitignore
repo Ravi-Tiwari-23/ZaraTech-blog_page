@@ -86,3 +86,4 @@ sqlite_data_backup.json
 
 # Generated static output
 staticfiles/
+.vercel/

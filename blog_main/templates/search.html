@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
-{% block title %}Search{% if keyword %}: {{ keyword }}{% endif %} | GenVilla Insights{% endblock %}
-{% block meta_description %}{% if keyword %}Search results for {{ keyword }} on GenVilla Insights.{% else %}Search GenVilla Insights property guides and real estate stories.{% endif %}{% endblock %}
+{% block title %}Search{% if keyword %}: {{ keyword }}{% endif %} | ZaraTech Insights{% endblock %}
+{% block meta_description %}{% if keyword %}Search results for {{ keyword }} on ZaraTech Insights.{% else %}Search ZaraTech engineering guides and technology stories.{% endif %}{% endblock %}
 {% block robots %}noindex, nofollow{% endblock %}
 {% block content %}
 <section class="search-page site-shell">
-    <header class="search-heading" data-reveal><span class="eyebrow">Find your next useful read</span><h1>{% if keyword %}Search results for “{{ keyword }}”{% else %}Search GenVilla Insights{% endif %}</h1><p>{% if blogs %}We found {{ blogs|length }} stor{{ blogs|length|pluralize:"y,ies" }} matching your search.{% else %}Search by city, property topic or question.{% endif %}</p></header>
-    <form class="large-search" action="{% url 'search' %}" method="GET" role="search" data-reveal><i class="fa fa-search"></i><label class="sr-only" for="results-search">Search articles</label><input id="results-search" type="search" name="keyword" value="{{ keyword }}" placeholder="Try ‘home buying’, ‘renting’ or a city name" autofocus><button type="submit" class="button button-primary">Search</button></form>
+    <header class="search-heading" data-reveal><span class="eyebrow">Find your next useful read</span><h1>{% if keyword %}Search results for “{{ keyword }}”{% else %}Search ZaraTech Insights{% endif %}</h1><p>{% if blogs %}We found {{ blogs|length }} stor{{ blogs|length|pluralize:"y,ies" }} matching your search.{% else %}Search by language, platform, technology or question.{% endif %}</p></header>
+    <form class="large-search" action="{% url 'search' %}" method="GET" role="search" data-reveal><i class="fa fa-search"></i><label class="sr-only" for="results-search">Search articles</label><input id="results-search" type="search" name="keyword" value="{{ keyword }}" placeholder="Try ‘AI agents’, ‘cloud’ or ‘security’" autofocus><button type="submit" class="button button-primary">Search</button></form>
     {% if blogs %}
     <div class="search-results">
         {% for post in blogs %}

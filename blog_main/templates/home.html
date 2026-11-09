@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
-{% block title %}GenVilla Insights | Practical Property Guides & Real Estate Ideas{% endblock %}
-{% block meta_description %}Clear property guides, market perspectives and practical real estate insights for buyers, owners and curious city dwellers across India.{% endblock %}
-{% block social_title %}GenVilla Insights | Practical Property Guides & Real Estate Ideas{% endblock %}
-{% block social_description %}Clear property guides, market perspectives and practical real estate insights for buyers, owners and curious city dwellers across India.{% endblock %}
-{% block twitter_title %}GenVilla Insights | Practical Property Guides & Real Estate Ideas{% endblock %}
-{% block twitter_description %}Clear property guides, market perspectives and practical real estate insights for buyers, owners and curious city dwellers across India.{% endblock %}
+{% block title %}ZaraTech Insights | AI, Cloud & Software Engineering{% endblock %}
+{% block meta_description %}Practical engineering guides, emerging technology analysis and clear perspectives on AI, cloud, cybersecurity and modern software.{% endblock %}
+{% block social_title %}ZaraTech Insights | AI, Cloud & Software Engineering{% endblock %}
+{% block social_description %}Practical technology intelligence for developers, founders and curious minds.{% endblock %}
+{% block twitter_title %}ZaraTech Insights | AI, Cloud & Software Engineering{% endblock %}
+{% block twitter_description %}Practical technology intelligence for developers, founders and curious minds.{% endblock %}
 {% block content %}
 <section class="hero-section site-shell">
     {% if featured_post %}
-    <div class="hero-slider" data-featured-slider data-reveal role="region" aria-roledescription="carousel" aria-label="Featured property stories">
+    <div class="hero-slider" data-featured-slider data-reveal role="region" aria-roledescription="carousel" aria-label="Featured technology stories">
         {% for post in featured_post %}
         <article class="hero-story hero-slide{% if forloop.first %} is-active{% endif %}" data-slide="{{ forloop.counter0 }}" aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}">
             <a class="hero-media" href="{% url 'blogs' post.slug %}" aria-label="Read {{ post.title }}">
@@ -36,15 +36,15 @@
         {% endif %}
     </div>
     {% else %}
-    <div class="empty-hero" data-reveal><span class="eyebrow eyebrow-light">GenVilla property journal</span><h1>Better spaces begin with better information.</h1><p>Practical ideas for buying, renting, designing and living well.</p><a href="#latest" class="button button-primary">Explore latest stories</a></div>
+    <div class="empty-hero" data-reveal><span class="eyebrow eyebrow-light">ZaraTech engineering journal</span><h1>Understand what is shaping technology.</h1><p>Practical guides and clear analysis for people building the future.</p><a href="#latest" class="button button-primary">Explore latest stories</a></div>
     {% endif %}
 </section>
 
 {% if featured_post|length > 1 %}
-<section class="site-shell section-block featured-strip" id="market-guides">
+<section class="site-shell section-block featured-strip" id="tech-guides">
     <div class="section-heading" data-reveal>
         <div><span class="eyebrow">Editor’s selection</span><h2>Worth your time</h2></div>
-        <span class="section-note">Handpicked insights for smarter moves</span>
+        <span class="section-note">Handpicked insights for smarter technical decisions</span>
     </div>
     <div class="featured-grid">
         {% for post in featured_post %}
@@ -74,8 +74,8 @@
 <section class="popular-section">
     <div class="site-shell section-block">
         <div class="section-heading popular-heading" data-reveal>
-            <div><span class="eyebrow eyebrow-light">Most read right now</span><h2>Popular on GenVilla</h2></div>
-            <p class="section-note">The stories helping readers make confident property decisions.</p>
+            <div><span class="eyebrow eyebrow-light">Most read right now</span><h2>Popular on ZaraTech</h2></div>
+            <p class="section-note">The stories helping builders make confident technology decisions.</p>
         </div>
         <div class="popular-grid">
             {% for post in popular_posts %}
@@ -99,8 +99,8 @@
 <section class="section-tint" id="latest">
     <div class="site-shell section-block">
         <div class="section-heading" data-reveal>
-            <div><span class="eyebrow">Fresh perspectives</span><h2>Latest from GenVilla</h2></div>
-            <p class="section-note">Ideas that help you understand the market—and feel at home in it.</p>
+            <div><span class="eyebrow">Fresh perspectives</span><h2>Latest from ZaraTech</h2></div>
+            <p class="section-note">Ideas that help you understand modern systems and build them better.</p>
         </div>
         <div class="content-layout">
             <div class="article-feed">
@@ -116,22 +116,22 @@
                     {% include "_bookmark_control.html" with post=post extra_class="feed-bookmark" %}
                 </article>
                 {% empty %}
-                <div class="empty-state" data-reveal><i class="fa fa-newspaper-o"></i><h3>Stories are on the way</h3><p>Check back soon for fresh property insights.</p></div>
+                <div class="empty-state" data-reveal><i class="fa fa-newspaper-o"></i><h3>Stories are on the way</h3><p>Check back soon for fresh technology insights.</p></div>
                 {% endfor %}
             </div>
 
             <aside class="home-sidebar">
                 <div class="sidebar-panel about-panel" data-reveal>
                     <span class="eyebrow">Our point of view</span>
-                    <h3>{{ about.about_heading|default:'Property, without the jargon' }}</h3>
-                    <p>{{ about.about_description|default:'GenVilla turns complex real estate questions into clear, useful stories for everyday decisions.' }}</p>
-                    <a href="#market-guides" class="story-link">Discover our guides <i class="fa fa-long-arrow-right"></i></a>
+                    <h3>{{ about.about_heading|default:'Technology, without the noise' }}</h3>
+                    <p>{{ about.about_description|default:'ZaraTech turns complex engineering ideas into clear, useful stories for real-world decisions.' }}</p>
+                    <a href="#tech-guides" class="story-link">Discover our guides <i class="fa fa-long-arrow-right"></i></a>
                 </div>
                 <div class="sidebar-panel newsletter-panel" data-reveal>
                     <span class="newsletter-icon"><i class="fa fa-envelope-o"></i></span>
-                    <span class="eyebrow eyebrow-light">The Sunday Address</span>
-                    <h3>One thoughtful property read, weekly.</h3>
-                    <p>No clutter. Just useful market signals and better-living ideas.</p>
+                    <span class="eyebrow eyebrow-light">The Weekly Compile</span>
+                    <h3>One thoughtful technology read, weekly.</h3>
+                    <p>No hype. Just useful technical signals and practical ideas.</p>
                     <p class="newsletter-status"><i class="fa fa-clock-o" aria-hidden="true"></i> Newsletter subscriptions are coming soon.</p>
                 </div>
                 {% if categories %}
